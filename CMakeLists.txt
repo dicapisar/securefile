@@ -11,13 +11,26 @@ if(APPLE)
     set(BOOST_ROOT "/opt/homebrew/Cellar/boost/1.87.0_1")
 endif()
 
+#file(GLOB SOURCES "src/*.cpp")
+
+#file(GLOB SOURCE "src/*.h")
+
+file(COPY data/data.sql DESTINATION ${CMAKE_BINARY_DIR})
+
+include_directories(src)
+
 # 📌 Buscar las librerías necesarias
 find_package(OpenSSL REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # 📌 Agregar el código fuente
-add_executable(securefile src/main.cpp)
+add_executable(securefile
+        src/main.cpp
+        src/services/database.cpp
+        src/services/encrypt.cpp
+        src/services/file.cpp
+)
 
 # 📌 Incluir directorios de las librerías
 target_include_directories(securefile PRIVATE
