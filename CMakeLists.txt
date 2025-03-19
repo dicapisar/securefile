@@ -30,6 +30,8 @@ add_executable(securefile
         src/services/database.cpp
         src/services/encrypt.cpp
         src/services/file.cpp
+        src/models/user.cpp
+        src/models/encrypted_file.cpp
 )
 
 # 📌 Incluir directorios de las librerías
