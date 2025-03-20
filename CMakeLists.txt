@@ -16,6 +16,7 @@ endif()
 #file(GLOB SOURCE "src/*.h")
 
 file(COPY data/data.sql DESTINATION ${CMAKE_BINARY_DIR})
+#file(COPY test.txt DESTINATION ${CMAKE_BINARY_DIR})
 
 include_directories(src)
 
