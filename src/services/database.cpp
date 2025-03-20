@@ -13,7 +13,7 @@
 using namespace std;
 
 
-Database::Database() {
+DatabaseService::DatabaseService() {
     if (sqlite3_open(":memory:", &db) != SQLITE_OK) {
         cerr << "❌ Error starting SQLite: " << sqlite3_errmsg(db) << endl;
         db = nullptr;
@@ -25,7 +25,7 @@ Database::Database() {
     is_there_backup = file_backup ? true : false;
 }
 
-Database::~Database() {
+DatabaseService::~DatabaseService() {
     if (db) {
         string filename_backup = "data_backup.sql";
 
@@ -49,7 +49,7 @@ Database::~Database() {
     }
 }
 
-bool Database::load_SQL_file() {
+bool DatabaseService::load_SQL_file() {
     string const filename = "data.sql";
     string const filename_backup = "data_backup.sql";
 
@@ -60,7 +60,7 @@ bool Database::load_SQL_file() {
     return loadDatabaseFromFile(filename);
 }
 
-vector<User> Database::getUsers() {  // TODO: DELETE
+vector<User> DatabaseService::getUsers() {  // TODO: DELETE
     vector<User> users;
     string sql = "SELECT * FROM users;";
     sqlite3_stmt* stmt;
@@ -88,7 +88,7 @@ vector<User> Database::getUsers() {  // TODO: DELETE
 }
 
 
-optional<vector<EncryptedFile>> Database::getEncryptedFilesByOwnerID(int owner_iD) {
+optional<vector<EncryptedFile>> DatabaseService::getEncryptedFilesByOwnerID(int owner_iD) {
     string sql = R"(
         SELECT e.id, e.owner_id, e.file_name, e.file_path, e.last_modified, e.password, u.id, u.student_id, u.name, u.email, u.password, u.is_admin, u.created_at
         FROM encrypted_files e
@@ -135,7 +135,7 @@ optional<vector<EncryptedFile>> Database::getEncryptedFilesByOwnerID(int owner_i
 
 }
 
-optional<vector<EncryptedFile>> Database::getSharedEncryptedFilesByUserID(int user_id) {
+optional<vector<EncryptedFile>> DatabaseService::getSharedEncryptedFilesByUserID(int user_id) {
     string sql = R"(
         SELECT e.id, e.owner_id, e.file_name, e.file_path, e.last_modified, e.password, u.id, u.student_id, u.name, u.email, u.password, u.is_admin, u.created_at
         FROM shared_files
@@ -183,22 +183,11 @@ optional<vector<EncryptedFile>> Database::getSharedEncryptedFilesByUserID(int us
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-bool Database::loadDatabaseFromFile(const string &filename) {
-    ifstream file(filename);
+bool DatabaseService::loadDatabaseFromFile(const string &file_name) {
+    ifstream file(file_name);
 
     if (!file) {
-        cerr << "❌ Error opening sql file " << filename << endl;
+        cerr << "❌ Error opening sql file " << file_name << endl;
         return false;
     }
 
@@ -214,13 +203,13 @@ bool Database::loadDatabaseFromFile(const string &filename) {
         return false;
     }
 
-    cout << "✅ Data loaded successfully from: " << filename << endl;
+    cout << "✅ Data loaded successfully from: " << file_name << endl;
     return true;
 }
 
-bool Database::loadDatabaseFromBackup(const string &filename) {
+bool DatabaseService::loadDatabaseFromBackup(const string &file_name) {
     sqlite3* fileDB;
-    if (sqlite3_open(filename.c_str(), &fileDB) != SQLITE_OK) {
+    if (sqlite3_open(file_name.c_str(), &fileDB) != SQLITE_OK) {
         cerr << "❌ Error opening sql file for restoration of Database.\n";
         return false;
     }
@@ -236,7 +225,7 @@ bool Database::loadDatabaseFromBackup(const string &filename) {
     sqlite3_backup_finish(backup);
     sqlite3_close(fileDB);
 
-    cout << "✅ Database restored from: " << filename << endl;
+    cout << "✅ Database restored from: " << file_name << endl;
     return true;
 }
 

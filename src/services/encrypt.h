@@ -8,12 +8,12 @@
 #include <iostream>
 using namespace std;
 
-class Encrypt {
+class EncryptService {
   private:
     void deriveKeyAndIV(const string &password, unsigned char *key, unsigned char *iv);
   public:
-    Encrypt();
-    ~Encrypt();
+    EncryptService();
+    ~EncryptService();
 
     vector<unsigned char> encryptAES(const vector<unsigned char> &data, const string &password);
     vector<unsigned char> decryptAES(const vector<unsigned char> &encryptedData, const string &password);

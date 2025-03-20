@@ -12,9 +12,9 @@ using namespace std;
 int main() {
     cout << "👀 Validating installation of Libraries...\n";
 
-    Database db;
-    db.load_SQL_file();
-    vector<User> users = db.getUsers();
+    DatabaseService database_service;
+    database_service.load_SQL_file();
+    vector<User> users = database_service.getUsers();
     for (const auto& user : users) {
         cout << "ID: " << user.id << " | Nombre: " << user.name
                 << " | Email: " << user.email << " | Password: " << user.password
@@ -22,7 +22,7 @@ int main() {
                 << " | Crated at: " << user.created_at << std::endl;
     }
 
-    auto encryptedFileOpt = db.getEncryptedFilesByOwnerID(1);
+    auto encryptedFileOpt = database_service.getEncryptedFilesByOwnerID(1);
     if (encryptedFileOpt.has_value()) {
         vector<EncryptedFile> encryptedFiles = encryptedFileOpt.value();
         for (const auto& encryptedFile : encryptedFiles) {
@@ -33,7 +33,7 @@ int main() {
         }
     }
 
-    auto sharedEncryptedFileOpt = db.getSharedEncryptedFilesByUserID(2);
+    auto sharedEncryptedFileOpt = database_service.getSharedEncryptedFilesByUserID(2);
     if (sharedEncryptedFileOpt.has_value()) {
         vector<EncryptedFile> encryptedFiles = sharedEncryptedFileOpt.value();
         for (const auto& encryptedFile : encryptedFiles) {
@@ -51,8 +51,8 @@ int main() {
     const string file_to_encrypt = "test.txt";
     const string password = "password";
 
-    File file_service;
-    Encrypt encrypt_service;
+    FileService file_service;
+    EncryptService encrypt_service;
 
     vector<unsigned char> file = file_service.readFile(file_to_encrypt);
 

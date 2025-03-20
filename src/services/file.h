@@ -10,10 +10,10 @@
 using namespace std;
 
 
-class File {
+class FileService {
   public:
-    File();
-    ~File();
+    FileService();
+    ~FileService();
 
     vector<unsigned char> readFile(const string &file_name);
     void writeFile(const string &file_name, const vector<unsigned char> &data);

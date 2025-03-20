@@ -13,15 +13,15 @@ using namespace std;
 
 #define AES_BLOCK_SIZE 16
 
-Encrypt::Encrypt() {
+EncryptService::EncryptService() {
   cout << "✅ Encrypt service started correctly 🚀\n";
 }
 
-Encrypt::~Encrypt() {
+EncryptService::~EncryptService() {
   cout << "✅ Encrypt service closed correctly\n";
 }
 
-vector<unsigned char> Encrypt::encryptAES(const vector<unsigned char> &data, const string &password) {
+vector<unsigned char> EncryptService::encryptAES(const vector<unsigned char> &data, const string &password) {
   unsigned char key[32], iv[16];
   deriveKeyAndIV(password, key, iv);
 
@@ -42,7 +42,7 @@ vector<unsigned char> Encrypt::encryptAES(const vector<unsigned char> &data, con
   return encrypted;
 }
 
-vector<unsigned char> Encrypt::decryptAES(const vector<unsigned char> &encryptedData, const string &password) {
+vector<unsigned char> EncryptService::decryptAES(const vector<unsigned char> &encryptedData, const string &password) {
   unsigned char key[32], iv[16];
   deriveKeyAndIV(password, key, iv);
 
@@ -63,9 +63,7 @@ vector<unsigned char> Encrypt::decryptAES(const vector<unsigned char> &encrypted
   return decrypted;
 }
 
-
-
-void Encrypt::deriveKeyAndIV(const string &password, unsigned char *key, unsigned char *iv) {
+void EncryptService::deriveKeyAndIV(const string &password, unsigned char *key, unsigned char *iv) {
   unsigned char hash[SHA256_DIGEST_LENGTH];
   SHA256(reinterpret_cast<const unsigned char *>(password.c_str()), password.size(), hash);
   memcpy(key, hash, 32);

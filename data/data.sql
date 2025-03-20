@@ -43,11 +43,3 @@ INSERT INTO encrypted_files (owner_id, file_name, file_path, password) VALUES (1
 
 INSERT INTO shared_files (encrypted_file_id, shared_user_id) VALUES (2, 2);
 INSERT INTO shared_files (encrypted_file_id, shared_user_id) VALUES (3, 2);
-
-
-SELECT e.id, e.owner_id, e.file_name, e.file_path, e.last_modified, e.password, u.id, u.student_id, u.name, u.email, u.password, u.is_admin, u.created_at
-FROM shared_files
-JOIN encrypted_files E on E.id = shared_files.encrypted_file_id
-JOIN users u on shared_files.shared_user_id = u.id
-WHERE shared_user_id = 1;
-

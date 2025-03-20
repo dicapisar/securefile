@@ -13,15 +13,15 @@
 using namespace std;
 
 
-class Database {
+class DatabaseService {
     private:
       sqlite3* db;
       bool is_there_backup;
-      bool loadDatabaseFromFile(const string &filename);
-      bool loadDatabaseFromBackup(const string &filename);
+      bool loadDatabaseFromFile(const string &file_name);
+      bool loadDatabaseFromBackup(const string &file_name);
     public:
-      Database();
-      ~Database();
+      DatabaseService();
+      ~DatabaseService();
 
       bool load_SQL_file();
       vector<User> getUsers();
