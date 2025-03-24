@@ -3,7 +3,6 @@ project(securefile)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# 📌 Verifica el sistema operativo para usar Homebrew en macOS
 if(APPLE)
     message(STATUS "Detectado macOS - Usando Homebrew")
     set(OPENSSL_ROOT_DIR "/opt/homebrew/Cellar/openssl@3/3.4.1")
@@ -20,12 +19,10 @@ file(COPY data/data.sql DESTINATION ${CMAKE_BINARY_DIR})
 
 include_directories(src)
 
-# 📌 Buscar las librerías necesarias
 find_package(OpenSSL REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
-# 📌 Agregar el código fuente
 add_executable(securefile
         src/main.cpp
         src/services/database.cpp
@@ -33,16 +30,16 @@ add_executable(securefile
         src/services/file.cpp
         src/models/user.cpp
         src/models/encrypted_file.cpp
+        src/models/shared_file.cpp
+        src/models/metadata_file.cpp
 )
 
-# 📌 Incluir directorios de las librerías
 target_include_directories(securefile PRIVATE
         ${OPENSSL_ROOT_DIR}/include
         ${SQLITE_ROOT_DIR}/include
         ${BOOST_ROOT}/include
 )
 
-# 📌 Enlazar las librerías necesarias
 target_link_libraries(securefile PRIVATE
         OpenSSL::SSL
         OpenSSL::Crypto
