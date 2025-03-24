@@ -5,10 +5,22 @@
 #ifndef METADATA_FILE_H
 #define METADATA_FILE_H
 
+#include <iostream>
 
+#include "encrypted_file.h"
 
-class metadata_file {
+using namespace std;
 
+class MetadataFile {
+public:
+    int id;
+    EncryptedFile encrypted_file;
+    string last_update;
+
+    MetadataFile();
+    ~MetadataFile();
+
+    MetadataFile(int id, EncryptedFile encrypted_file, string& last_update);
 };
 
 
