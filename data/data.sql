@@ -43,3 +43,5 @@ INSERT INTO encrypted_files (owner_id, file_name, file_path, password) VALUES (1
 
 INSERT INTO shared_files (encrypted_file_id, shared_user_id) VALUES (2, 2);
 INSERT INTO shared_files (encrypted_file_id, shared_user_id) VALUES (3, 2);
+
+INSERT INTO metadata_files (encrypted_file_id, last_update)  VALUES (1, CURRENT_TIMESTAMP)
