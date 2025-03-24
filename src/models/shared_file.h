@@ -5,9 +5,23 @@
 #ifndef SHARED_FILE_H
 #define SHARED_FILE_H
 
+#include <iostream>
 
+#include "encrypted_file.h"
 
-class shared_file {
+using namespace std;
+
+class SharedFile {
+public:
+    int id;
+    EncryptedFile encrypted_file;
+    User shared_user;
+    string date;
+
+    SharedFile();
+    ~SharedFile();
+
+    SharedFile(int id, EncryptedFile encrypted_file, User shared_user, string &date);
 
 };
 
