@@ -87,6 +87,41 @@ int main() {
 
     cout << "📂 File Decrypted Successfully at: " << output_file_name << endl;
 
+    auto user_test = database_service.getModelByID(UserModel, 1);
+
+    if (user_test && holds_alternative<User>(*user_test)) {
+        User u = get<User>(*user_test);
+        cout << "ID: " << u.id << "\n";
+    }
+
+    auto encrypted_file_test = database_service.getModelByID(EncryptedFileModel, 1);
+
+    if (encrypted_file_test && holds_alternative<EncryptedFile>(*encrypted_file_test)) {
+        EncryptedFile ef = get<EncryptedFile>(*encrypted_file_test);
+        cout << "ID Encrypted File: " << ef.id << "\n";
+    }
+
+    auto share_file_test = database_service.getModelByID(SharedFileModel, 1);
+
+    if (share_file_test && holds_alternative<SharedFile>(*share_file_test)) {
+        SharedFile sf = get<SharedFile>(*share_file_test);
+        cout << "ID Shared File: " << sf.id << "\n";
+    }
+
+    auto metadata_file_test = database_service.getModelByID(MetadataFileModel, 1);
+
+    if (metadata_file_test && holds_alternative<MetadataFile>(*metadata_file_test)) {
+        MetadataFile mf = get<MetadataFile>(*metadata_file_test);
+        cout << "ID Metadata File: " << mf.id << "\n";
+    }
+
+
+    map<string, string> attributes = {{"name", "Test of update  "}};
+    bool isUptaded = database_service.alterAttributeFromModelByID(UserModel, 2, attributes);
+
+    if (!isUptaded) cout << "❌ Error updating";
+
+
     cout << "🎉 All Libraries Working Successfully.\n";
     return 0;
 }
