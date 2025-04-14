@@ -9,7 +9,8 @@ using namespace std;
 #include  "services/file.h"
 #include  "services/encrypt.h"
 
-int main() {
+
+void loadDependenciesTest() {
     cout << "👀 Validating installation of Libraries...\n";
 
     DatabaseService database_service;
@@ -123,5 +124,9 @@ int main() {
 
 
     cout << "🎉 All Libraries Working Successfully.\n";
+}
+
+int main() {
+    loadDependenciesTest();
     return 0;
 }
