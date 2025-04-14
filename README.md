@@ -15,45 +15,88 @@ SecureFile is a **standalone, lightweight** console application designed to **en
 
 ---
 
-## 🛠️ **Installation on macOS**
-Follow these steps to install the required dependencies and run the application.
+## 🛠️ Installation
 
-### 1️⃣ **Install Homebrew (if not installed)**
+### 🍏 macOS (with Homebrew)
+
+1️⃣ **Install Homebrew (if not installed)**
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2️⃣ **Install Required Libraries**
-
+2️⃣ **Install Dependencies**
 ```bash
 brew install openssl sqlite boost
 ```
 
-### 3️⃣ **Clone the Repository**
-
+3️⃣ **Clone the Repository**
 ```bash
 git clone git@github.com:dicapisar/securefile.git
 cd securefile
 ```
 
-### 4️⃣ **Compile and Run the Application**
-
-#### 1. Create the build directory:
+4️⃣ **Build the Project**
 ```bash
-mkdir -p build && cd build
-```
-
-#### 2. Run CMake:
-```bash
+mkdir build && cd build
 cmake ..
+cmake --build .
+./securefile
 ```
 
-#### 3. Compile the application:
+---
+
+### 🪟 Windows (with vcpkg)
+
+1️⃣ **Install vcpkg (if not already installed)**
+```bash
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat
+```
+
+2️⃣ **Install Dependencies**
+```bash
+.\vcpkg install openssl sqlite3 boost-filesystem
+```
+
+3️⃣ **Clone the Repository**
+```bash
+git clone https://github.com/dicapisar/securefile.git
+cd securefile
+```
+
+4️⃣ **Configure the Project with vcpkg**
+```bash
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake  # path to vcpkg installed
+```
+
+5️⃣ **Build the Project**
 ```bash
 cmake --build .
 ```
 
-#### 4.	Run the program:
+6️⃣ **Run the Program**
 ```bash
-./securefile
+.\Debug\securefile.exe
 ```
+
+---
+
+## 📂 Database
+
+The project uses an in-memory SQLite database that loads from `data/data.sql` and saves to `data_backup.sql` on exit.
+
+---
+
+## ✨ Output Example
+
+```bash
+✅ Database started on memory correctly 🚀
+📁 File Encrypted Successfully at: ./encrypted_files/test.txt.enc
+📂 File Decrypted Successfully at: ./decrypted_files/test.txt
+🎉 All Libraries Working Successfully.
+```
+
+---
