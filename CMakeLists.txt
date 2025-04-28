@@ -4,18 +4,28 @@ project(securefile)
 set(CMAKE_CXX_STANDARD 20)
 
 if(APPLE)
-    message(STATUS "Detectado macOS - Usando Homebrew")
+    message(STATUS "MacOS Detected - Using Homebrew")
     set(OPENSSL_ROOT_DIR "/opt/homebrew/Cellar/openssl@3/3.4.1")
     set(SQLITE_ROOT_DIR "/opt/homebrew/Cellar/sqlite/3.49.1")
     set(BOOST_ROOT "/opt/homebrew/Cellar/boost/1.87.0_1")
+elseif(WIN32)
+    message(STATUS "Windows Detected")
+
+    if(NOT DEFINED OPENSSL_ROOT_DIR)
+        set(OPENSSL_ROOT_DIR "C:/path/to/openssl")
+    endif()
+
+    if(NOT DEFINED SQLITE_ROOT_DIR)
+        set(SQLITE_ROOT_DIR "C:/path/to/sqlite")
+    endif()
+
+    if(NOT DEFINED BOOST_ROOT)
+        set(BOOST_ROOT "C:/path/to/boost")
+    endif()
+
 endif()
 
-#file(GLOB SOURCES "src/*.cpp")
-
-#file(GLOB SOURCE "src/*.h")
-
 file(COPY data/data.sql DESTINATION ${CMAKE_BINARY_DIR})
-#file(COPY test.txt DESTINATION ${CMAKE_BINARY_DIR})
 
 include_directories(src)
 
@@ -38,6 +48,12 @@ target_include_directories(securefile PRIVATE
         ${OPENSSL_ROOT_DIR}/include
         ${SQLITE_ROOT_DIR}/include
         ${BOOST_ROOT}/include
+)
+
+target_link_directories(securefile PRIVATE
+        ${OPENSSL_ROOT_DIR}/lib
+        ${SQLITE_ROOT_DIR}/lib
+        ${BOOST_ROOT}/lib
 )
 
 target_link_libraries(securefile PRIVATE
