@@ -10,6 +10,7 @@
 #include <map>
 #include <models/metadata_file.h>
 #include <models/shared_file.h>
+#include <vector>
 
 #include "models/user.h"
 #include "models/encrypted_file.h"

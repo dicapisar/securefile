@@ -4,6 +4,7 @@
 
 #include "database.h"
 
+#include <vector>
 #include <sqlite3.h>
 #include <iostream>
 #include <fstream>

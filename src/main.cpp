@@ -3,11 +3,13 @@
 //
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 #include "services/database.h"
 #include  "services/file.h"
 #include  "services/encrypt.h"
+
 
 
 void loadDependenciesTest() {

@@ -5,6 +5,7 @@
 #include "encrypt.h"
 
 #include <iostream>
+#include <vector>
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
