@@ -12,14 +12,17 @@ elseif(WIN32)
     message(STATUS "Windows Detected")
 
     if(NOT DEFINED OPENSSL_ROOT_DIR)
+        message(STATUS "OPENSSL DIDN'T DEFINED")
         set(OPENSSL_ROOT_DIR "C:/path/to/openssl")
     endif()
 
     if(NOT DEFINED SQLITE_ROOT_DIR)
+        message(STATUS "SQLITE DIDN'T DEFINED")
         set(SQLITE_ROOT_DIR "C:/path/to/sqlite")
     endif()
 
     if(NOT DEFINED BOOST_ROOT)
+        message(STATUS "BOOST DIDN'T DEFINED")
         set(BOOST_ROOT "C:/path/to/boost")
     endif()
 
