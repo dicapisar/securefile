@@ -6,6 +6,7 @@
 #define SHARED_FILE_H
 
 #include <iostream>
+#include <string>
 
 #include "encrypted_file.h"
 

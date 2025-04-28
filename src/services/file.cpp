@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <string>
 
 using namespace std;
 using namespace boost::filesystem;

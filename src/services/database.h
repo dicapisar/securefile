@@ -6,11 +6,13 @@
 #define DATABASE_H
 
 #include <sqlite3.h>
-#include <iostream>
 #include <map>
+#include <variant>
 #include <models/metadata_file.h>
 #include <models/shared_file.h>
 #include <vector>
+#include <string>
+#include <optional>
 
 #include "models/user.h"
 #include "models/encrypted_file.h"

@@ -10,6 +10,10 @@
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <optional>
+#include <string>
+#include <variant>
+#include <tuple>
 #include "models/user.h"
 #include "models/encrypted_file.h"
 #include "models/shared_file.h"

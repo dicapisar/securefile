@@ -3,6 +3,7 @@
 //
 
 #include "metadata_file.h"
+#include <string>
 
 MetadataFile::MetadataFile() : id(0), encrypted_file(EncryptedFile()), last_update("") {}
 

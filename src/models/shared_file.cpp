@@ -2,6 +2,7 @@
 // Created by Diego Camilo Pinto Sarmiento on 20/3/2025.
 //
 
+#include <string>
 #include "shared_file.h"
 
 SharedFile::SharedFile(): id(0), encrypted_file(EncryptedFile()), shared_user(User()), date("") {}

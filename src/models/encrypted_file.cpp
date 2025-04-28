@@ -3,6 +3,7 @@
 //
 
 #include "encrypted_file.h"
+#include <string>
 
 
 EncryptedFile::EncryptedFile() : id(0), file_name(""), file_path(""), last_modified(""), password("") {}

@@ -3,6 +3,7 @@
 //
 
 #include "user.h"
+#include <string>
 
 User::User() : id(0), student_id(""), name(""), email(""), password(""), is_admin(false), created_at("") {}
 
