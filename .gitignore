@@ -1,9 +1,3 @@
 .idea
-build/CMakeFiles
-build/CMakeCache.txt
-build/Makefile
-build/cmake_install.cmake
-build/data.sql
-build/decrypted_files
-build/encrypted_files
+build/
 cmake-build-debug
