@@ -6,6 +6,12 @@
 #include <vector>
 #include <variant>
 #include <tuple>
+
+#ifdef _WIN32
+  #define WIN32_LEAN_AND_MEAN
+  #include <windows.h>
+#endif
+
 using namespace std;
 
 #include "services/database.h"
@@ -16,6 +22,18 @@ using namespace std;
 
 
 void loadDependenciesTest() {
+
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    if (GetConsoleMode(hOut, &mode)) {
+        mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hOut, mode);
+    }
+#endif
+
+
     cout << "👀 Validating installation of Libraries...\n";
 
     DatabaseService database_service;
@@ -131,21 +149,7 @@ void loadDependenciesTest() {
     cout << "🎉 All Libraries Working Successfully.\n";
 }
 
-void configUTF8() {
-    #ifdef _WIN32
-        #include <windows.h>
-        SetConsoleOutputCP(CP_UTF8); // Set the console to UTF-8
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Get the console output handle
-        DWORD dwMode = 0; // Initialize the mode variable
-        if (GetConsoleMode(hOut, &dwMode)) { // Check if we can get the console mode
-            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Enable virtual terminal processing
-            SetConsoleMode(hOut, dwMode); // Set the new mode
-        }
-    #endif
-}
-
 int main() {
-    configUTF8();
     loadDependenciesTest();
     return 0;
 }
