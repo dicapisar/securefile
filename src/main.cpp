@@ -131,7 +131,21 @@ void loadDependenciesTest() {
     cout << "🎉 All Libraries Working Successfully.\n";
 }
 
+void configUTF8() {
+    #ifdef _WIN32
+        #include <windows.h>
+        SetConsoleOutputCP(CP_UTF8); // Set the console to UTF-8
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Get the console output handle
+        DWORD dwMode = 0; // Initialize the mode variable
+        if (GetConsoleMode(hOut, &dwMode)) { // Check if we can get the console mode
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Enable virtual terminal processing
+            SetConsoleMode(hOut, dwMode); // Set the new mode
+        }
+    #endif
+}
+
 int main() {
+    configUTF8();
     loadDependenciesTest();
     return 0;
 }

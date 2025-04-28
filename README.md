@@ -52,7 +52,15 @@ cmake --build .
 
 ### 🪟 Windows (with vcpkg)
 
-1️⃣ **Install vcpkg (if not already installed)**
+1️⃣ **Install Visual Studio (if not already installed)**
+
+[Information Here](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false#installvs)
+
+2️⃣ **Install CMake (if not already installed)**
+
+[Information Here](https://cmake.org/download/)
+
+3️⃣ **Install vcpkg (if not already installed)**
 
 ```powershell
 git clone https://github.com/microsoft/vcpkg.git
@@ -60,20 +68,20 @@ cd vcpkg
 .\bootstrap-vcpkg.bat
 ```
 
-2️⃣ **Install Dependencies**
+4️⃣ **Install Dependencies**
 
 ```powershell
 .\vcpkg install openssl sqlite3 boost-filesystem
 ```
 
-3️⃣ **Clone the Repository**
+5️⃣ **Clone the Repository**
 
 ```powershell
 git clone https://github.com/dicapisar/securefile.git
 cd securefile
 ```
 
-4️⃣ **Create and Configure the Build Directory**
+6️⃣ **Create and Configure the Build Directory**
 
 ```powershell
 mkdir build
@@ -81,13 +89,13 @@ cd build
 cmake -A x64 --toolchain ../vcpkg/scripts/buildsystems/vcpkg.cmake ..
 ```
 
-5️⃣ **Build the Project**
+7️⃣ **Build the Project**
 
 ```powershell
 cmake --build . --config Debug
 ```
 
-6️⃣ **Run the Program**
+8️⃣ **Run the Program**
 
 ```powershell
 .\Debug\securefile.exe
