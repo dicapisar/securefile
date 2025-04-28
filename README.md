@@ -112,9 +112,46 @@ The project uses an in-memory SQLite database that loads from `data/data.sql` an
 ## ✨ Output Example
 
 ```bash
+👀 Validating installation of Libraries...
 ✅ Database started on memory correctly 🚀
+✅ Database restored from: data_backup.sql
+ID: 1 | Nombre: ADMIN | Email: admin@email.com | Password: something | Admin: Yes | Crated at: 2025-04-28 09:07:33
+ID: 2 | Nombre: Test of update   | Email: diego@torrens.com | Password: something | Admin: No | Crated at: 2025-04-28 09:07:33
+
+📂 Encrypted File Found:
+ID: 1 | Name: test_one | Path: test_path_one
+👤 Owner: ADMIN | Owner Email: admin@email.com
+
+📂 Encrypted File Found:
+ID: 2 | Name: test_two | Path: test_path_two
+👤 Owner: ADMIN | Owner Email: admin@email.com
+
+📂 Encrypted File Found:
+ID: 3 | Name: test_three | Path: test_path_three
+👤 Owner: ADMIN | Owner Email: admin@email.com
+
+📂 Shared Encrypted File Found:
+ID: 2 | Name: test_two | Path: test_path_two
+👤 Owner: Test of update   | Owner Email: diego@torrens.com
+
+📂 Shared Encrypted File Found:
+ID: 3 | Name: test_three | Path: test_path_three
+👤 Owner: Test of update   | Owner Email: diego@torrens.com
+✅ File service started correctly 🚀
+✅ Encrypt service started correctly 🚀
+❌ Error reading file. 
+
 📁 File Encrypted Successfully at: ./encrypted_files/test.txt.enc
-📂 File Decrypted Successfully at: ./decrypted_files/test.txt
+📂 File Decrypted Successfully at: ./encrypted_files/test.txt.enc
+ID: 1
+ID Encrypted File: 1
+ID Shared File: 1
+ID Metadata File: 1
 🎉 All Libraries Working Successfully.
+✅ Encrypt service closed correctly
+✅ File service closed correctly
+✅ Database saved in: data_backup.sql
+🔒 Database closed successfully since destructor method.
+
 ```
 
