@@ -18,6 +18,7 @@ using namespace std;
 #include  "services/file.h"
 #include  "services/encrypt.h"
 #include <string>
+#include "ui/ui.h"
 
 
 
@@ -149,7 +150,29 @@ void loadDependenciesTest() {
     cout << "🎉 All Libraries Working Successfully.\n";
 }
 
-int main() {
+void start() {
     loadDependenciesTest();
+    UI::showWelcomeMessage();
+
+    std::vector<std::string> options = {
+        "Login",
+        "Quit",
+    };
+    int optionSelected = UI::showMenu(options);
+
+    UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+    std::vector<std::string> encabezados = {"ID", "Nombre", "Email"};
+    std::vector<std::map<std::string,std::string>> filas = {
+        {{"ID","1"}, {"Nombre","Admin"}, {"Email","admin@ej.com"}},
+        {{"ID","2"}, {"Nombre","Usuario"}, {"Email","usr@ej.com"}}
+    };
+    UI::showTableWithInformation(encabezados, filas);
+
+    UI::showExitMessage();
+}
+
+int main() {
+    start();
     return 0;
 }

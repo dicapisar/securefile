@@ -30,6 +30,7 @@ add_executable(securefile
         src/models/encrypted_file.cpp
         src/models/shared_file.cpp
         src/models/metadata_file.cpp
+        src/ui/ui.cpp
 )
 
 # in macOS add includes/links explicitly
