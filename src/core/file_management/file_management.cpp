@@ -14,22 +14,22 @@ FileManagement::FileManagement(const DatabaseService& database, const EncryptSer
 FileManagement::~FileManagement() = default;
 
 
-bool FileManagement::encryptFile(Session& session, const string& file_name, const string& password) {
+bool FileManagement::encryptFile(const Session& session, const string& file_name, const string& password) {
     return true;
 }
 
-bool FileManagement::decryptFile(Session& session, const string& file_name, const string& password) {
+bool FileManagement::decryptFile(const Session& session, const string& file_name, const string& password) {
     return true;
 }
 
-bool FileManagement::deleteFile(Session& session, const string& file_name) {
+bool FileManagement::deleteFile(const Session& session, const string& file_name) {
     return true;
 }
 
-bool FileManagement::listFiles(Session& session) {
-    return true;
+optional<vector<EncryptedFile>> FileManagement::getListFiles(const Session& session) {
+    return nullopt;
 }
 
-bool FileManagement::shareFile(Session& session, const string& file_name, const string& student_id) {
+bool FileManagement::shareFile(const Session& session, const string& file_name, const string& student_id) {
     return true;
 }

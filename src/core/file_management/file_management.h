@@ -17,11 +17,11 @@ class FileManagement {
         FileService file;
 
     public:
-        bool encryptFile(Session& session, const string& file_name, const string& password);
-        bool decryptFile(Session& session, const string& file_name, const string& password);
-        bool deleteFile(Session& session, const string& file_name);
-        bool listFiles(Session& session);
-        bool shareFile(Session& session, const string& file_name, const string& student_id);
+        bool encryptFile(const Session& session, const string& file_name, const string& password);
+        bool decryptFile(const Session& session, const string& file_name, const string& password);
+        bool deleteFile(const Session& session, const string& file_name);
+        optional<vector<EncryptedFile>> getListFiles(const Session& session);
+        bool shareFile(const Session& session, const string& file_name, const string& student_id);
 
         FileManagement(const DatabaseService& database, const EncryptService& encrypt, const FileService& file);
         ~FileManagement();

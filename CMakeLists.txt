@@ -33,6 +33,7 @@ add_executable(securefile
         src/models/session.cpp
         src/core/auth/auth.cpp
         src/core/file_management/file_management.cpp
+        src/core/user_management/user_manager.cpp
         src/ui/ui.cpp
 )
 
