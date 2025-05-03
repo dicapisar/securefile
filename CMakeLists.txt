@@ -32,6 +32,7 @@ add_executable(securefile
         src/models/metadata_file.cpp
         src/models/session.cpp
         src/core/auth/auth.cpp
+        src/core/file_management/file_management.cpp
         src/ui/ui.cpp
 )
 
