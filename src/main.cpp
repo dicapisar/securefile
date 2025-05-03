@@ -1,11 +1,6 @@
-//
-// Created by Diego Camilo Pinto Sarmiento on 17/3/2025.
-//
-
 #include <iostream>
 #include <vector>
 #include <variant>
-#include <tuple>
 
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
@@ -17,12 +12,20 @@ using namespace std;
 #include "services/database.h"
 #include  "services/file.h"
 #include  "services/encrypt.h"
+#include "core/auth/auth.h"
 #include <string>
 #include "ui/ui.h"
 
+class Dependencies {
+    public:
+        DatabaseService database;
+        EncryptService encrypt;
+        FileService file;
 
+    Dependencies(DatabaseService& database, EncryptService& encrypt, FileService& file) : database(database), encrypt(encrypt), file(file) {}
+};
 
-void loadDependenciesTest() {
+Dependencies loadDependenciesTest() {
 
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
@@ -34,12 +37,11 @@ void loadDependenciesTest() {
     }
 #endif
 
-
     cout << "👀 Validating installation of Libraries...\n";
 
     DatabaseService database_service;
     database_service.load_SQL_file();
-    vector<User> users = database_service.getUsers();
+    /**vector<User> users = database_service.getUsers();
     for (const auto& user : users) {
         cout << "ID: " << user.id << " | Nombre: " << user.name
                 << " | Email: " << user.email << " | Password: " << user.password
@@ -67,17 +69,18 @@ void loadDependenciesTest() {
                     << " | Path: " << encryptedFile.file_path << endl;
             cout << "👤 Owner: " << encryptedFile.owner.name << " | Owner Email: " << encryptedFile.owner.email << endl;
         }
-    }
+    } **/
 
     /*
      * Encrypt
      */
 
-    const string file_to_encrypt = "test.txt";
-    const string password = "password";
-
     FileService file_service;
     EncryptService encrypt_service;
+
+    /**
+    const string file_to_encrypt = "test.txt";
+    const string password = "password";
 
     vector<unsigned char> file = file_service.readFile(file_to_encrypt);
 
@@ -95,9 +98,13 @@ void loadDependenciesTest() {
 
     cout << "📁 File Encrypted Successfully at: " << output_file_name << endl;
 
+    **/
+
     /*
      * Decrypt
      */
+
+    /**
 
     string path_encrypted_file = "./encrypted_files/" + file_to_encrypt + ".enc";
     vector<unsigned char> encrypted_file_to_decrypt = file_service.readFile(path_encrypted_file);
@@ -146,13 +153,29 @@ void loadDependenciesTest() {
 
     if (!isUptaded) cout << "❌ Error updating";
 
+    **/
+
 
     cout << "🎉 All Libraries Working Successfully.\n";
+
+    Dependencies dependencies = Dependencies(database_service, encrypt_service, file_service);
+
+    return dependencies;
 }
 
 void start() {
-    loadDependenciesTest();
+    Dependencies dependencies = loadDependenciesTest();
     UI::showWelcomeMessage();
+
+    Auth auth = Auth(dependencies.database);
+
+    Session session = auth.login("A0001625", "something");
+
+    if (session.is_logged) {
+        UI::showMessage("Welcome " + session.user_name, MessageType::Success);
+    } else {
+        UI::showMessage("Login failed", MessageType::Error);
+    }
 
     std::vector<std::string> options = {
         "Login",
