@@ -12,6 +12,8 @@
 #include <string>
 #include <variant>
 #include <tuple>
+#include <models/report.h>
+
 #include "models/user.h"
 #include "models/encrypted_file.h"
 #include "models/shared_file.h"
@@ -139,7 +141,7 @@ optional<vector<EncryptedFile>> DatabaseService::getEncryptedFilesByOwnerID(int 
 
     sqlite3_bind_int(stmt, 1, owner_iD);
 
-    optional<vector<EncryptedFile>> result = vector<EncryptedFile>(); ;
+    optional<vector<EncryptedFile>> result = vector<EncryptedFile>();
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
 
@@ -218,7 +220,7 @@ optional<vector<EncryptedFile>> DatabaseService::getSharedEncryptedFilesByUserID
 
 }
 
-optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> DatabaseService::getModelByID(Models model_name, int model_id) {
+optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> DatabaseService::getModelByID(Models model_name, int model_id) {
     string table_name = getTableNameFromModelName(model_name);
 
     string sql = "SELECT * FROM " + table_name + " WHERE id = " + to_string(model_id);
@@ -231,7 +233,7 @@ optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> DatabaseService
 
     sqlite3_bind_int(stmt, 1, model_id);
 
-    optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> result;
+    optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> result;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
 
@@ -256,7 +258,7 @@ optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> DatabaseService
                 const string& ef_last_modified = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
                 const string& ef_password = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
 
-                optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> ef_owner = getModelByID(UserModel, ef_owner_id);
+                optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> ef_owner = getModelByID(UserModel, ef_owner_id);
 
                 auto user = std::get_if<User>(&(*ef_owner));
 
@@ -269,12 +271,12 @@ optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> DatabaseService
                 const int sf_shared_user_id = sqlite3_column_int(stmt, 2);
                 string date = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3));
 
-                optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> sf_encrypted_file_opt = getModelByID(
+                optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> sf_encrypted_file_opt = getModelByID(
                     EncryptedFileModel, sf_encrypted_file_id);
 
                 EncryptedFile sf_encrypted_file = get<EncryptedFile>(*sf_encrypted_file_opt);
 
-                optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> sf_shared_user_opt = getModelByID(
+                optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> sf_shared_user_opt = getModelByID(
                     UserModel, sf_shared_user_id);
 
                 User sf_shared_user = get<User>(*sf_shared_user_opt);
@@ -287,7 +289,7 @@ optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> DatabaseService
                 const int mf_encrypted_file_id = sqlite3_column_int(stmt, 1);
                 string mf_last_update = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2));
 
-                optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> mf_encrypted_file_opt = getModelByID(
+                optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> mf_encrypted_file_opt = getModelByID(
                 EncryptedFileModel, mf_encrypted_file_id);
 
                 EncryptedFile mf_encrypted_file = get<EncryptedFile>(*mf_encrypted_file_opt);
@@ -407,29 +409,51 @@ string DatabaseService:: getTableNameFromModelName(Models model_name) {
         {UserModel, "users"},
         {EncryptedFileModel, "encrypted_files"},
         {SharedFileModel, "shared_files"},
-        {MetadataFileModel, "metadata_files"}
+        {MetadataFileModel, "metadata_files"},
+        {ReportModel, "reports"}
     };
 
     auto it = table_name_map.find(model_name);
     return (it != table_name_map.end()) ? it->second : "";
 }
 
+optional<vector<Report>> DatabaseService::getReportsByOwnerID(int owner_ID) {
+    string sql = R"(
+        SELECT r.id, r.encrypted_file_id, r.encrypted_file_name, r.user_id, r.user_name, r.student_id, r.action, r.action_date
+        FROM reports r
+        JOIN encrypted_files ef on r.encrypted_file_id = ef.id
+        WHERE ef.owner_id = ?;
+    )";
 
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error making consult: " << sqlite3_errmsg(db) << endl;
+        return nullopt;
+    }
 
+    sqlite3_bind_int(stmt, 1, owner_ID);
 
+    optional<vector<Report>> result = vector<Report>();
 
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int r_id = sqlite3_column_int(stmt, 0);
+        int r_encrypted_file_id = sqlite3_column_int(stmt, 1);
+        string r_encrypted_file_name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        int r_user_id = sqlite3_column_int(stmt, 3);
+        string r_user_name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        string r_student_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        int r_action = sqlite3_column_int(stmt, 6);
+        string r_action_date = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
 
+        result->emplace_back(r_id, r_encrypted_file_id, r_encrypted_file_name, r_user_id, r_user_name, r_student_id, static_cast<Actions>(r_action), r_action_date);
+    }
 
+    sqlite3_finalize(stmt);
 
+    if (result->empty()) return nullopt;
 
-
-
-
-
-
-
-
-
+    return result;
+}
 
 
 bool DatabaseService::loadDatabaseFromFile(const string &file_name) {

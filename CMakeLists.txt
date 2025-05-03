@@ -31,9 +31,11 @@ add_executable(securefile
         src/models/shared_file.cpp
         src/models/metadata_file.cpp
         src/models/session.cpp
+        src/models/report.cpp
         src/core/auth/auth.cpp
         src/core/file_management/file_management.cpp
         src/core/user_management/user_manager.cpp
+        src/core/report_management/report_management.cpp
         src/ui/ui.cpp
 )
 
