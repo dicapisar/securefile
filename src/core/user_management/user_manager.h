@@ -9,7 +9,7 @@ using namespace std;
 
 class UserManager {
     private:
-        DatabaseService database;
+        DatabaseService *database;
 
     public:
         bool addUser(const Session& session, const User& new_user);
@@ -18,7 +18,7 @@ class UserManager {
         bool updatePassword(const Session& session, const string& student_id, const string& new_password);
         optional<vector<User>> getListUsers(const Session& session);
 
-        UserManager(const DatabaseService& database);
+        UserManager(DatabaseService* database);
         ~UserManager();
 
 };

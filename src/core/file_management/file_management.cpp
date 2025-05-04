@@ -8,7 +8,7 @@
 #include <string>
 using namespace std;
 
-FileManagement::FileManagement(const DatabaseService& database, const EncryptService& encrypt, const FileService& file)
+FileManagement::FileManagement(DatabaseService* database, EncryptService* encrypt, FileService* file)
     : database(database), encrypt(encrypt), file(file) {}
 
 FileManagement::~FileManagement() = default;

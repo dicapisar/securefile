@@ -18,11 +18,17 @@ using namespace std;
 
 class Dependencies {
     public:
-        DatabaseService database;
-        EncryptService encrypt;
-        FileService file;
+        DatabaseService* database;
+        EncryptService* encrypt;
+        FileService* file;
 
-    Dependencies(DatabaseService& database, EncryptService& encrypt, FileService& file) : database(database), encrypt(encrypt), file(file) {}
+    Dependencies(DatabaseService* database, EncryptService* encrypt, FileService* file) : database(database), encrypt(encrypt), file(file) {}
+
+    ~Dependencies() {
+        delete database;
+        delete encrypt;
+        delete file;
+    }
 };
 
 Dependencies loadDependenciesTest() {
@@ -39,8 +45,8 @@ Dependencies loadDependenciesTest() {
 
     cout << "👀 Validating installation of Libraries...\n";
 
-    DatabaseService database_service;
-    database_service.load_SQL_file();
+    auto* database_service = new DatabaseService();
+    database_service->load_SQL_file();
     /**vector<User> users = database_service.getUsers();
     for (const auto& user : users) {
         cout << "ID: " << user.id << " | Nombre: " << user.name
@@ -75,8 +81,8 @@ Dependencies loadDependenciesTest() {
      * Encrypt
      */
 
-    FileService file_service;
-    EncryptService encrypt_service;
+    auto* file_service = new FileService();
+    auto* encrypt_service = new EncryptService();
 
     /**
     const string file_to_encrypt = "test.txt";
@@ -167,7 +173,7 @@ void start() {
     Dependencies dependencies = loadDependenciesTest();
     UI::showWelcomeMessage();
 
-    Auth auth = Auth(dependencies.database);
+    Auth auth{ dependencies.database };
 
     Session session = auth.login("A0001625", "something");
 

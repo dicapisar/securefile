@@ -12,9 +12,9 @@ using namespace std;
 
 class FileManagement {
     private:
-        DatabaseService database;
-        EncryptService encrypt;
-        FileService file;
+        DatabaseService *database;
+        EncryptService *encrypt;
+        FileService *file;
 
     public:
         bool encryptFile(const Session& session, const string& file_name, const string& password);
@@ -23,7 +23,7 @@ class FileManagement {
         optional<vector<EncryptedFile>> getListFiles(const Session& session);
         bool shareFile(const Session& session, const string& file_name, const string& student_id);
 
-        FileManagement(const DatabaseService& database, const EncryptService& encrypt, const FileService& file);
+        FileManagement(DatabaseService* database, EncryptService* encrypt, FileService* file);
         ~FileManagement();
 };
 

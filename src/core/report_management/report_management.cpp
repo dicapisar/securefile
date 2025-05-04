@@ -4,7 +4,7 @@
 #include "./models/session.h"
 #include "./models/report.h"
 
-ReportManagement::ReportManagement(const DatabaseService& database) : database(database) {}
+ReportManagement::ReportManagement(DatabaseService* database) : database(database) {}
 
 ReportManagement::~ReportManagement() = default;
 

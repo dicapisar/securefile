@@ -7,13 +7,13 @@
 
 class ReportManagement {
   private:
-    DatabaseService database;
+    DatabaseService *database;
 
   public:
     bool createReport(const Report& report);
     optional<vector<Report>> getListReports(const Session& session);
 
-    ReportManagement(const DatabaseService& database);
+    ReportManagement(DatabaseService* database);
     ~ReportManagement();
 };
 

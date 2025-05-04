@@ -10,7 +10,7 @@
 
 using namespace std;
 
-UserManager::UserManager(const DatabaseService& database) : database(database) {}
+UserManager::UserManager(DatabaseService* database) : database(database) {}
 UserManager::~UserManager() = default;
 
 bool UserManager::addUser(const Session& session, const User& new_user) {
