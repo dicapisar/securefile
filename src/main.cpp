@@ -314,22 +314,74 @@ void start() {
             }
             case 3: {
                 UI::showMessage("Deleting file...", MessageType::Info);
-                // Call the delete function here
+
+                // 1. Get all encrypted files allowed to the user
+
+                // 2. remove the encrypted files which the owner is not the user of the session
+
+                // 3. Show the list of encrypted files
+
+                // 4. Request the file ID to delete
+
+                // 5. Get the path of the file selected
+
+                // 6. Call the delete function of file management
+
+                // 7. show the message of success or error
+
                 break;
             }
             case 4: {
                 UI::showMessage("Listing files...", MessageType::Info);
-                vector<string> headers = {"ID", "File Name"};
-                std::vector<std::map<std::string,std::string>> rows = {
-                    {{"ID","1"}, {"File Name","test.txt"}},
-                    {{"ID","2"}, {"File Name","test2.txt"}}
-                };
+                // Get all encrypted files allowed to the user
+                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
+
+                if (!encrypted_files.has_value()) {
+                    UI::showMessage("No encrypted files found", MessageType::Warning);
+                    break;
+                }
+
+                // Show the list of encrypted files
+                vector<string> headers = {"ID", "File Name", "Owner"};
+                vector<map<string,string>> rows;
+
+                int index = 1;
+                for (const auto& file : *encrypted_files) {
+                    map<string,string> row;
+                    row["ID"] = to_string(index);
+                    row["File Name"] = file.file_name;
+                    row["Owner"] = file.owner.name;
+                    rows.push_back(row);
+                    index++;
+                }
                 UI::showTableWithInformation(headers, rows);
                 break;
             }
             case 5: {
                 UI::showMessage("Sharing file...", MessageType::Info);
-                // Call the share function here
+
+                // 1. Get all encrypted files allowed to the user
+
+                // 2. remove the encrypted files which the owner is not the user of the session
+
+                // 3. Show the list of encrypted files
+
+                // 4. Request the file ID to share
+
+                // 5. Get the encrypted file selected
+
+                // 6. Validate if the encrypted file has password
+
+                // 7. If the file has password, request the password
+
+                // 8. Request the student ID to share
+
+                // 9. Get the path of the file selected
+
+                // 10. Call the share function of file management
+
+                // 11. show the message of success or error
+
                 break;
             }
             case 6: {

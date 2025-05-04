@@ -22,7 +22,7 @@ class FileManagement {
         bool decryptFile(const Session& session, int fileID, const string& password);
         bool deleteFile(const Session& session, const string& file_name);
         optional<vector<EncryptedFile>> getListEncryptedFiles(const Session& session);
-        bool shareFile(const Session& session, const string& file_name, const string& student_id);
+        bool shareFile(const Session& session, const string& file_name, const string& student_id, const string& password);
 
         FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService);
         ~FileManagement();

@@ -120,6 +120,18 @@ bool FileManagement::decryptFile(const Session& session, int fileID, const strin
 }
 
 bool FileManagement::deleteFile(const Session& session, const string& file_name) {
+
+    // 1. Check if the session is valid
+
+    // 2. Get the encrypted file from the database
+
+    // 3. Check if user of the session is the owner of the file
+
+    // 4. Delete encrypted file using file service -> remove: you must use the file_path of the encrypted file
+
+    // 5. Delete the file from the database
+
+    // 6. Generate a report on database
     return true;
 }
 
@@ -158,6 +170,27 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
     return all_encrypted_files;
 }
 
-bool FileManagement::shareFile(const Session& session, const string& file_name, const string& student_id) {
+bool FileManagement::shareFile(const Session& session, const string& file_name, const string& student_id, const string& password) {
+
+    // 1. Check if the session is valid
+
+    // 2. Get the encrypted file from the database
+
+    // 3. Check if user of the session is the owner of the file
+
+    // 4. Check if the file has password
+
+    // 5. If the file has no password update the encrypted file with the password
+
+    // 5.1. Generate the encrypted file map
+
+    // 5.2. Update the encrypted file in the database (use the alterAttributeFromModelByID function of database service)
+
+    // 6. Generate the SharedFile object
+
+    // 7. Save the shared file in the database
+
+    // 8. Generate a report on database
+
     return true;
 }
