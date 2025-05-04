@@ -4,12 +4,12 @@
 
 using namespace std;
 
-Auth::Auth(const DatabaseService& database) : database(database) {}
+Auth::Auth(DatabaseService* database) : database(database) {}
 Auth::~Auth() = default;
 
 Session Auth::login(const string &student_id, const string &password) {
     Session session;
-    auto users = database.getUsers();
+    auto users = database->getUsers();
 
     for (const auto& user : users) {
         if (user.student_id == student_id && user.password == password) { // TODO: Validate by hash no in text plain

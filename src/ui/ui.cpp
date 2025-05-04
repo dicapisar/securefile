@@ -48,10 +48,25 @@ int UI::showMenu(const vector<string>& options) {
 
     int option_selected;
     cin >> option_selected;
-    while (option_selected < 1 || option_selected > (int)options.size()) {
-        showMessage("Invalid option. Please try again.", MessageType::Error);
-        cin >> option_selected;
+
+    while (true) {
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            showMessage("Invalid input. Please enter a number.", MessageType::Error);
+            cout << "> ";
+            cin >> option_selected;
+        } else {
+            if (option_selected < 1 || option_selected > (int)options.size()) {
+                showMessage("Invalid option. Please try again.", MessageType::Error);
+                cout << "> ";
+                cin >> option_selected;
+            } else {
+                break;
+            }
+        }
     }
+
     return option_selected;
 }
 

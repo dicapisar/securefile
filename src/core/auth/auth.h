@@ -10,12 +10,12 @@
 
 class Auth {
     private:
-      DatabaseService database;
+    DatabaseService *database;
     public:
         Session login(const string &student_id, const string &password);
         bool logout(Session& session);
 
-        Auth(const DatabaseService& db);
+        Auth(DatabaseService* db);
         ~Auth();
 };
 

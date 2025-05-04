@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <models/report.h>
 
 #include "models/user.h"
 #include "models/encrypted_file.h"
@@ -22,6 +23,7 @@ enum Models {
     EncryptedFileModel,
     SharedFileModel,
     MetadataFileModel,
+    ReportModel
 };
 
 
@@ -40,7 +42,8 @@ class DatabaseService {
       vector<User> getUsers();
       optional<vector<EncryptedFile>> getEncryptedFilesByOwnerID(int owner_iD);
       optional<vector<EncryptedFile>> getSharedEncryptedFilesByUserID(int user_id);
-      optional<variant<User, EncryptedFile, SharedFile, MetadataFile>> getModelByID(Models model_name, int model_id);
+      optional<vector<Report>> getReportsByOwnerID(int owner_ID);
+      optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> getModelByID(Models model_name, int model_id);
       bool alterAttributeFromModelByID(Models model_name, int id, const map<string, string> &attributes);
       bool deleteRecordByID(Models model_name, int id);
 };

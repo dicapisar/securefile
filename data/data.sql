@@ -34,6 +34,17 @@ CREATE TABLE IF NOT EXISTS metadata_files (
     FOREIGN KEY (encrypted_file_id) REFERENCES encrypted_files(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    encrypted_file_id INTEGER NOT NULL,
+    encrypted_file_name TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    user_name TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    action TEXT NOT NULL,
+    action_date date DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO users (student_id, name, email, password, is_admin) VALUES ("A", "ADMIN", "admin@email.com", "something", 1);
 INSERT INTO users (student_id, name, email, password, is_admin) VALUES ("A0001625", "Diego", "diego@torrens.com", "something", 0);
 
@@ -44,4 +55,11 @@ INSERT INTO encrypted_files (owner_id, file_name, file_path, password) VALUES (1
 INSERT INTO shared_files (encrypted_file_id, shared_user_id) VALUES (2, 2);
 INSERT INTO shared_files (encrypted_file_id, shared_user_id) VALUES (3, 2);
 
-INSERT INTO metadata_files (encrypted_file_id, last_update)  VALUES (1, CURRENT_TIMESTAMP)
+INSERT INTO metadata_files (encrypted_file_id, last_update)  VALUES (1, CURRENT_TIMESTAMP);
+
+INSERT INTO reports (encrypted_file_id, encrypted_file_name, user_id, user_name, student_id, action) VALUES (1, "test_one.txt", 1, "ADMIN", "A", "CREATE");
+
+
+SELECT * FROM reports
+JOIN encrypted_files ef on reports.encrypted_file_id = ef.id
+WHERE ef.owner_id = 1;
