@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS reports (
     action_date date DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (student_id, name, email, password, is_admin) VALUES ("A", "ADMIN", "admin@email.com", "something", 1);
-INSERT INTO users (student_id, name, email, password, is_admin) VALUES ("A0001625", "Diego", "diego@torrens.com", "something", 0);
+INSERT INTO users (student_id, name, email, password, is_admin) VALUES ("A", "ADMIN", "admin@email.com", "100000$46d559a82b64a95621676af977bebe2b$da67dd130d230dec3a29c7a120a3225639d139f0967aa36391bea31f6d104a58", 1);
+INSERT INTO users (student_id, name, email, password, is_admin) VALUES ("A0001625", "Diego", "diego@torrens.com", "100000$46d559a82b64a95621676af977bebe2b$da67dd130d230dec3a29c7a120a3225639d139f0967aa36391bea31f6d104a58", 0);
 
 INSERT INTO encrypted_files (owner_id, file_name, file_path, password) VALUES (1, "test_one", "test_path_one", "test_password");
 INSERT INTO encrypted_files (owner_id, file_name, file_path, password) VALUES (1, "test_two", "test_path_two", "test_password");

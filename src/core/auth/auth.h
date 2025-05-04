@@ -5,17 +5,20 @@
 #ifndef AUTH_H
 #define AUTH_H
 
+#include <services/encrypt.h>
+
 #include "./services/database.h"
 #include "./models/session.h"
 
 class Auth {
     private:
-    DatabaseService *database;
+        DatabaseService *databaseService;
+        EncryptService *encryptService;
     public:
         Session login(const string &student_id, const string &password);
         bool logout(Session& session);
 
-        Auth(DatabaseService* db);
+        Auth(DatabaseService* databaseService, EncryptService* encryptService);
         ~Auth();
 };
 

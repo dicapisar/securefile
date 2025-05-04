@@ -8,6 +8,9 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <string>
+#include <iomanip>
+#include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -68,4 +71,71 @@ void EncryptService::deriveKeyAndIV(const string &password, unsigned char *key, 
   SHA256(reinterpret_cast<const unsigned char *>(password.c_str()), password.size(), hash);
   memcpy(key, hash, 32);
   memcpy(iv, hash + 16, 16);
+}
+
+string EncryptService::hashPassword(const string &password) {
+  unsigned char salt[PASSWORD_SALT_LEN];
+  if (RAND_bytes(salt, sizeof(salt)) != 1) {
+    throw runtime_error("Failed to generate salt");
+  }
+
+  unsigned char hash[PASSWORD_HASH_LEN];
+  if (PKCS5_PBKDF2_HMAC(
+          password.c_str(), password.size(),
+          salt, sizeof(salt),
+          PBKDF2_ITERS,
+          EVP_sha256(),
+          sizeof(hash),
+          hash) != 1) {
+    throw runtime_error("PBKDF2 hashing failed");
+          }
+
+  ostringstream oss;
+  oss << PBKDF2_ITERS << '$';
+  oss << hex << setfill('0');
+  for (int i = 0; i < (int)sizeof(salt); ++i)
+    oss << setw(2) << (int)salt[i];
+  oss << '$';
+  for (int i = 0; i < (int)sizeof(hash); ++i)
+    oss << setw(2) << (int)hash[i];
+
+  return oss.str();
+}
+
+bool EncryptService::verifyPassword(const string &password, const string &hashedPassword) {
+  istringstream iss(hashedPassword);
+  string iterStr, saltHex, hashHex;
+  if (!getline(iss, iterStr, '$') ||
+      !getline(iss, saltHex, '$') ||
+      !getline(iss, hashHex)) {
+    return false;
+      }
+
+  int iters = stoi(iterStr);
+  if ((int)saltHex.size() != PASSWORD_SALT_LEN * 2 ||
+      (int)hashHex.size() != PASSWORD_HASH_LEN * 2) {
+    return false;
+      }
+
+  // 2) Convertir hex a bytes
+  vector<unsigned char> salt(PASSWORD_SALT_LEN), hashStored(PASSWORD_HASH_LEN);
+  for (int i = 0; i < PASSWORD_SALT_LEN; ++i)
+    salt[i] = stoi(saltHex.substr(i*2,2), nullptr, 16);
+  for (int i = 0; i < PASSWORD_HASH_LEN; ++i)
+    hashStored[i] = stoi(hashHex.substr(i*2,2), nullptr, 16);
+
+  // 3) Recalcular PBKDF2 con la misma salt e iteraciones
+  vector<unsigned char> hashCalc(PASSWORD_HASH_LEN);
+  if (PKCS5_PBKDF2_HMAC(
+          password.c_str(), password.size(),
+          salt.data(), salt.size(),
+          iters,
+          EVP_sha256(),
+          hashCalc.size(),
+          hashCalc.data()) != 1) {
+    return false;
+          }
+
+  // 4) Comparar en tiempo constante
+  return CRYPTO_memcmp(hashStored.data(), hashCalc.data(), PASSWORD_HASH_LEN) == 0;
 }

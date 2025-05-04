@@ -171,32 +171,115 @@ Dependencies loadDependenciesTest() {
 
 void start() {
     Dependencies dependencies = loadDependenciesTest();
+    Auth auth{ dependencies.database, dependencies.encrypt};
+
+
     UI::showWelcomeMessage();
 
-    Auth auth{ dependencies.database };
+    bool isLoggedIn = false;
 
-    Session session = auth.login("A0001625", "something");
+    while (true) {
+        // Check if the user is logged in
+        if (!isLoggedIn) {
+            std::vector<std::string> loginOptions = {
+                "Login",
+                "Quit",
+            };
 
-    if (session.is_logged) {
-        UI::showMessage("Welcome " + session.user_name, MessageType::Success);
-    } else {
-        UI::showMessage("Login failed", MessageType::Error);
+            int optionSelected = UI::showMenu(loginOptions);
+            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+
+            if (optionSelected == 1) {
+                UI::showMessage("Please enter your credentials", MessageType::Info);
+
+                UI::showMessage("Student ID: ", MessageType::Info);
+                string student_id;
+                cin >> student_id;
+
+                UI::showMessage("Password: ", MessageType::Info);
+                string password;
+                cin >> password;
+
+                Session session = auth.login(student_id, password);
+
+                if (session.is_logged) {
+                    isLoggedIn = true;
+                    UI::showMessage("Welcome " + session.user_name, MessageType::Success);
+                } else {
+                    UI::showMessage("Login failed", MessageType::Error);
+                    UI::showMessage("Please try again", MessageType::Info);
+                    continue;
+                }
+            } else {
+                break;
+            }
+        }
+
+        // Show the main menu if the user is logged in
+        std::vector<std::string> mainMenuOptions = {
+            "Encrypt File",
+            "Decrypt File",
+            "Delete File",
+            "List Files",
+            "Share File",
+            "See Report",
+            "Logout"
+        };
+
+        int optionSelected = UI::showMenu(mainMenuOptions);
+        UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+        switch (optionSelected) {
+            case 1: {
+                UI::showMessage("Encrypting file...", MessageType::Info);
+                // Call the encrypt function here
+                break;
+            }
+            case 2: {
+                UI::showMessage("Decrypting file...", MessageType::Info);
+                // Call the decrypt function here
+                break;
+            }
+            case 3: {
+                UI::showMessage("Deleting file...", MessageType::Info);
+                // Call the delete function here
+                break;
+            }
+            case 4: {
+                UI::showMessage("Listing files...", MessageType::Info);
+                vector<string> headers = {"ID", "File Name"};
+                std::vector<std::map<std::string,std::string>> rows = {
+                    {{"ID","1"}, {"File Name","test.txt"}},
+                    {{"ID","2"}, {"File Name","test2.txt"}}
+                };
+                UI::showTableWithInformation(headers, rows);
+                break;
+            }
+            case 5: {
+                UI::showMessage("Sharing file...", MessageType::Info);
+                // Call the share function here
+                break;
+            }
+            case 6: {
+                UI::showMessage("Generating report...", MessageType::Info);
+                // Call the report function here
+                break;
+            }
+            case 7: {
+                isLoggedIn = false;
+                UI::showMessage("Logging out...", MessageType::Success);
+                break;
+            }
+            default: {
+                UI::showMessage("Invalid option", MessageType::Error);
+            }
+        }
+
+        if (!isLoggedIn) {
+            break;
+        }
     }
-
-    std::vector<std::string> options = {
-        "Login",
-        "Quit",
-    };
-    int optionSelected = UI::showMenu(options);
-
-    UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
-
-    std::vector<std::string> encabezados = {"ID", "Nombre", "Email"};
-    std::vector<std::map<std::string,std::string>> filas = {
-        {{"ID","1"}, {"Nombre","Admin"}, {"Email","admin@ej.com"}},
-        {{"ID","2"}, {"Nombre","Usuario"}, {"Email","usr@ej.com"}}
-    };
-    UI::showTableWithInformation(encabezados, filas);
 
     UI::showExitMessage();
 }

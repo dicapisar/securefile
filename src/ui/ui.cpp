@@ -36,7 +36,7 @@ Created by:
 }
 
 void UI::showExitMessage() {
-    cout << "\n👋 ¡Adiós!\n\n";
+    cout << "\n👋 ¡Bye!\n\n";
 }
 
 int UI::showMenu(const vector<string>& options) {
