@@ -46,6 +46,7 @@ class DatabaseService {
       optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> getModelByID(Models model_name, int model_id);
       bool alterAttributeFromModelByID(Models model_name, int id, const map<string, string> &attributes);
       bool deleteRecordByID(Models model_name, int id);
+      bool saveEncryptedFile(const EncryptedFile &encryptedFile);
 };
 
 

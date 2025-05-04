@@ -19,6 +19,7 @@ class FileService {
     void writeFile(const string &file_name, const vector<unsigned char> &data);
     void createDirectory(const string &file_path);
     string removeExtension(const string &file_name, const string &extension);
+    void removeFile(const string &file_name);
 };
 
 

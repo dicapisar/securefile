@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <variant>
+#include <core/file_management/file_management.h>
 
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
@@ -171,12 +172,13 @@ Dependencies loadDependenciesTest() {
 
 void start() {
     Dependencies dependencies = loadDependenciesTest();
-    Auth auth{ dependencies.database, dependencies.encrypt};
 
+    Auth auth{ dependencies.database, dependencies.encrypt};
+    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file };
+    Session session;
+    bool isLoggedIn = false;
 
     UI::showWelcomeMessage();
-
-    bool isLoggedIn = false;
 
     while (true) {
         // Check if the user is logged in
@@ -201,7 +203,7 @@ void start() {
                 string password;
                 cin >> password;
 
-                Session session = auth.login(student_id, password);
+                session = auth.login(student_id, password);
 
                 if (session.is_logged) {
                     isLoggedIn = true;
@@ -233,12 +235,81 @@ void start() {
         switch (optionSelected) {
             case 1: {
                 UI::showMessage("Encrypting file...", MessageType::Info);
-                // Call the encrypt function here
+
+                // Request the file name
+                UI::showMessage("Please enter the file name to encrypt: ", MessageType::Info);
+                string file_name;
+                cin >> file_name;
+
+                // Request the password
+                UI::showMessage("Please enter the password: ", MessageType::Info);
+                string password;
+                cin >> password;
+
+                bool is_ok = file_management.encryptFile(session, file_name, password);
+
+                if (is_ok) {
+                    UI::showMessage("File encrypted successfully", MessageType::Success);
+                } else {
+                    UI::showMessage("Error encrypting file", MessageType::Error);
+                }
                 break;
             }
             case 2: {
                 UI::showMessage("Decrypting file...", MessageType::Info);
-                // Call the decrypt function here
+
+                // Get all encrypted files allowed to the user
+                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
+
+                if (!encrypted_files.has_value()) {
+                    UI::showMessage("No encrypted files found", MessageType::Warning);
+                    break;
+                }
+
+                // Show the list of encrypted files
+                vector<string> headers = {"ID", "File Name", "Owner"};
+                vector<map<string,string>> rows;
+
+                int index = 1;
+                for (const auto& file : *encrypted_files) {
+                    map<string,string> row;
+                    row["ID"] = to_string(index);
+                    row["File Name"] = file.file_name;
+                    row["Owner"] = file.owner.name;
+                    rows.push_back(row);
+                    index++;
+                }
+                UI::showTableWithInformation(headers, rows);
+
+                UI::showMessage("Please select the file ID to decrypt: ", MessageType::Info);
+                int file_id;
+                cin >> file_id;
+
+                if (file_id < 1 || file_id > rows.size()) {
+                    UI::showMessage("Invalid file ID", MessageType::Error);
+                    break;
+                }
+
+                EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
+
+                if ( fileSelected.password != "" && fileSelected.owner.id != session.user_id) {
+                    UI::showMessage("Please enter the password: ", MessageType::Info);
+                    string password;
+                    cin >> password;
+
+                    if (fileSelected.password != password) {
+                        UI::showMessage("Invalid password", MessageType::Error);
+                        break;
+                    }
+                }
+
+                bool isOK = file_management.decryptFile(session, fileSelected.id, fileSelected.password);
+
+                if (!isOK) {
+                    UI::showMessage("Error decrypting file", MessageType::Error);
+                } else {
+                    UI::showMessage("File decrypted successfully", MessageType::Success);
+                }
                 break;
             }
             case 3: {

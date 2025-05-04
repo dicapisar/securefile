@@ -455,6 +455,32 @@ optional<vector<Report>> DatabaseService::getReportsByOwnerID(int owner_ID) {
     return result;
 }
 
+bool DatabaseService::saveEncryptedFile(const EncryptedFile &encryptedFile) {
+    string sql = R"(
+        INSERT INTO encrypted_files (owner_id, file_name, file_path, password)
+        VALUES (?, ?, ?, ?);
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, encryptedFile.owner.id);
+    sqlite3_bind_text(stmt, 2, encryptedFile.file_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, encryptedFile.file_path.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, encryptedFile.password.c_str(), -1, SQLITE_TRANSIENT);
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error inserting record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
 
 bool DatabaseService::loadDatabaseFromFile(const string &file_name) {
     ifstream file(file_name);

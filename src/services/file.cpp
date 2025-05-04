@@ -43,3 +43,10 @@ string FileService::removeExtension(const string &file_name, const string &exten
     }
     return "";
 }
+
+void FileService::removeFile(const string &file_name) {
+    path file(file_name);
+    if (exists(file)) {
+        remove(file);
+    }
+}

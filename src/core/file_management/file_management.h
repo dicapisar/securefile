@@ -12,18 +12,19 @@ using namespace std;
 
 class FileManagement {
     private:
-        DatabaseService *database;
-        EncryptService *encrypt;
-        FileService *file;
+        DatabaseService *databaseService;
+        EncryptService *encryptService;
+        FileService *fileService;
+        static constexpr string PATH_ENCRYPT_FILE = "./encrypted_files/";
 
     public:
         bool encryptFile(const Session& session, const string& file_name, const string& password);
-        bool decryptFile(const Session& session, const string& file_name, const string& password);
+        bool decryptFile(const Session& session, int fileID, const string& password);
         bool deleteFile(const Session& session, const string& file_name);
-        optional<vector<EncryptedFile>> getListFiles(const Session& session);
+        optional<vector<EncryptedFile>> getListEncryptedFiles(const Session& session);
         bool shareFile(const Session& session, const string& file_name, const string& student_id);
 
-        FileManagement(DatabaseService* database, EncryptService* encrypt, FileService* file);
+        FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService);
         ~FileManagement();
 };
 
