@@ -386,7 +386,11 @@ void start() {
             }
             case 6: {
                 UI::showMessage("Generating report...", MessageType::Info);
-                // Call the report function here
+
+                // 1. Get all reports allowed to the user
+
+                // 2. Show the list of reports
+
                 break;
             }
             case 7: {

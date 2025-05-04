@@ -47,6 +47,8 @@ class DatabaseService {
       bool alterAttributeFromModelByID(Models model_name, int id, const map<string, string> &attributes);
       bool deleteRecordByID(Models model_name, int id);
       bool saveEncryptedFile(const EncryptedFile &encryptedFile);
+      bool saveSharedFile(const SharedFile &sharedFile);
+      bool saveReport(const Report &report);
 };
 
 

@@ -528,3 +528,57 @@ bool DatabaseService::loadDatabaseFromBackup(const string &file_name) {
     return true;
 }
 
+
+bool DatabaseService::saveSharedFile(const SharedFile &sharedFile) {
+    string sql = R"(
+        INSERT INTO shared_files (encrypted_file_id, shared_user_id)
+        VALUES (?, ?);
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, sharedFile.encrypted_file.id);
+    sqlite3_bind_int(stmt, 2, sharedFile.shared_user.id);
+
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error inserting record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DatabaseService::saveReport(const Report &report) {
+    string sql = R"(
+        INSERT INTO reports (encrypted_file_id, encrypted_file_name, user_id, user_name, student_id, action)
+        VALUES (?, ?, ?, ?, ?, ?);
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, report.encrypted_file_id);
+    sqlite3_bind_text(stmt, 2, report.encrypted_file_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 3, report.user_id);
+    sqlite3_bind_text(stmt, 4, report.user_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, report.student_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 6, static_cast<int>(report.action));
+
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error inserting record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
