@@ -20,7 +20,7 @@ class FileManagement {
     public:
         bool encryptFile(const Session& session, const string& file_name, const string& password);
         bool decryptFile(const Session& session, int fileID, const string& password);
-        bool deleteFile(const Session& session, const string& file_name);
+        bool deleteFile(const Session& session, int fileID, const string& file_name);
         optional<vector<EncryptedFile>> getListEncryptedFiles(const Session& session);
         bool shareFile(const Session& session, const string& file_name, const string& student_id, const string& password);
 
