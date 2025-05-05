@@ -135,6 +135,7 @@ bool FileManagement::deleteFile(const Session& session, int fileID, const string
     }
 
     EncryptedFile encrypted_file_row = get<EncryptedFile>(*encrypted_file);
+
     // 3. Check if user of the session is the owner of the file
     if (encrypted_file_row.owner.id != session.user_id) {
         return false;
@@ -144,11 +145,10 @@ bool FileManagement::deleteFile(const Session& session, int fileID, const string
     fileService->removeFile(encrypted_file_row.file_path);
 
     // 5. Delete the file from the database
-    bool isDeleted = databaseService->deleteRecordByID(EncryptedFileModel, fileID);
-
+    databaseService->deleteRecordByID(EncryptedFileModel, fileID);
 
     // 6. Generate a report on database
-
+    // TODO: SAVE REPORT
 
     return true;
 }

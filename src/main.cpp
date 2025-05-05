@@ -322,20 +322,22 @@ void start() {
                     UI::showMessage("No encrypted files found", MessageType::Warning);
                     break;
                 }
-                // ???? 2. remove the encrypted files which the owner is not the user of the session
-
-                // 3. Show the list of encrypted files
+                // 2. remove the encrypted files which the owner is not the user of the session
                 vector<string> headers = {"ID", "File Name"};
                 vector<map<string,string>> rows;
 
                 int index = 1;
                 for (const auto& file : *encrypted_files) {
-                    map<string,string> row;
-                    row["ID"] = to_string(index);
-                    row["File Name"] = file.file_name;
-                    rows.push_back(row);
+                    if (file.owner.id == session.user_id) {
+                        map<string,string> row;
+                        row["ID"] = to_string(index);
+                        row["File Name"] = file.file_name;
+                        rows.push_back(row);
+                    }
                     index++;
                 }
+
+                // 3. Show the list of encrypted files
                 UI::showTableWithInformation(headers, rows);
 
                 // 4. Request the file ID to delete
