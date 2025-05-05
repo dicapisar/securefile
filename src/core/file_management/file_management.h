@@ -15,7 +15,7 @@ class FileManagement {
         DatabaseService *databaseService;
         EncryptService *encryptService;
         FileService *fileService;
-        static constexpr string PATH_ENCRYPT_FILE = "./encrypted_files/";
+        static const string PATH_ENCRYPT_FILE;
 
     public:
         bool encryptFile(const Session& session, const string& file_name, const string& password);

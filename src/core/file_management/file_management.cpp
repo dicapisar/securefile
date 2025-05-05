@@ -8,6 +8,8 @@
 #include <string>
 using namespace std;
 
+const string FileManagement::PATH_ENCRYPT_FILE =  "./encrypted_files/";
+
 FileManagement::FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService)
     : databaseService(databaseService), encryptService(encryptService), fileService(fileService) {}
 
