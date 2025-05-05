@@ -163,7 +163,7 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
     optional<vector<EncryptedFile>> encrypted_files = databaseService->getEncryptedFilesByOwnerID(session.user_id);
 
     // Get the list of shared encrypted files from the database
-    optional<vector<EncryptedFile>> shared_encrypted_files = databaseService->getSharedEncryptedFilesByUserID(session.user_id);
+    optional<vector<SharedFile>> shared_encrypted_files = databaseService->getSharedEncryptedFilesByUserID(session.user_id);
 
     // Check if the user has any encrypted files
     if (!encrypted_files.has_value() && !shared_encrypted_files.has_value()) {
@@ -188,27 +188,64 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
     return all_encrypted_files;
 }
 
-bool FileManagement::shareFile(const Session& session, const string& file_name, const string& student_id, const string& password) {
+bool FileManagement::shareFile(const Session& session, int fileID, const string& file_name, const string& student_id, const string& password) {
 
     // 1. Check if the session is valid
+    if (!session.is_logged) {
+        return false;
+    }
 
     // 2. Get the encrypted file from the database
+    optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> encrypted_file = databaseService->getModelByID(EncryptedFileModel, fileID);
+    if (!encrypted_file.has_value() || !holds_alternative<EncryptedFile>(*encrypted_file)) {
+        return false;
+    }
+
+    EncryptedFile encrypted_file_row = get<EncryptedFile>(*encrypted_file);
 
     // 3. Check if user of the session is the owner of the file
+    if (session.user_id != encrypted_file_row.owner.id) {
+        return false;
+    }
 
     // 4. Check if the file has password
+    bool isOK = encrypted_file_row.password != "";
 
     // 5. If the file has no password update the encrypted file with the password
+    if (!isOK) {
+      encrypted_file_row.password = password;
+      }
 
     // 5.1. Generate the encrypted file map
+    map<string, string> encrypted_file_map;
+    encrypted_file_map["file_name"] = encrypted_file_row.file_name;
+    encrypted_file_map["file_path"] = encrypted_file_row.file_path;
+    encrypted_file_map["password"] = encrypted_file_row.password;
+    encrypted_file_map["last_modified"] = getCurrentTime();
+    encrypted_file_map["owner_id"] = to_string(encrypted_file_row.owner.id);
+
+    for (auto& [key, value] : encrypted_file_map) {
+        cout << key << ": " << value << endl;
+    }
 
     // 5.2. Update the encrypted file in the database (use the alterAttributeFromModelByID function of database service)
+    bool isUpdated = databaseService->alterAttributeFromModelByID(EncryptedFileModel, encrypted_file_row.id, encrypted_file_map);
+
+    if (!isUpdated) {
+        return false;
+    }
 
     // 6. Generate the SharedFile object
+    SharedFile shared_file;
+    shared_file.encrypted_file = encrypted_file_row;
+    shared_file.shared_user = User();
+    shared_file.date = getCurrentTime();
 
     // 7. Save the shared file in the database
+    bool isSaved = databaseService->saveSharedFile(shared_file);
 
     // 8. Generate a report on database
+    // TODO: SAVE REPORT
 
     return true;
 }
