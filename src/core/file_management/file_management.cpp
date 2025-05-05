@@ -163,7 +163,7 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
     optional<vector<EncryptedFile>> encrypted_files = databaseService->getEncryptedFilesByOwnerID(session.user_id);
 
     // Get the list of shared encrypted files from the database
-    optional<vector<SharedFile>> shared_encrypted_files = databaseService->getSharedEncryptedFilesByUserID(session.user_id);
+    optional<vector<EncryptedFile>> shared_encrypted_files = databaseService->getSharedEncryptedFilesByUserID(session.user_id);
 
     // Check if the user has any encrypted files
     if (!encrypted_files.has_value() && !shared_encrypted_files.has_value()) {
@@ -237,6 +237,7 @@ bool FileManagement::shareFile(const Session& session, int fileID, const string&
 
     // 6. Generate the SharedFile object
     SharedFile shared_file;
+    shared_file.id = encrypted_file_row.id;
     shared_file.encrypted_file = encrypted_file_row;
     shared_file.shared_user = User();
     shared_file.date = getCurrentTime();
