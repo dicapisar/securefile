@@ -159,11 +159,11 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
         return nullopt;
     }
 
-    // Get the list of encrypted files from the database
-    optional<vector<EncryptedFile>> encrypted_files = databaseService->getEncryptedFilesByOwnerID(session.user_id);
-
     // Get the list of shared encrypted files from the database
     optional<vector<EncryptedFile>> shared_encrypted_files = databaseService->getSharedEncryptedFilesByUserID(session.user_id);
+
+    // Get the list of encrypted files from the database
+    optional<vector<EncryptedFile>> encrypted_files = databaseService->getEncryptedFilesByOwnerID(session.user_id);
 
     // Check if the user has any encrypted files
     if (!encrypted_files.has_value() && !shared_encrypted_files.has_value()) {
@@ -184,6 +184,7 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
             all_encrypted_files.push_back(file);
         }
     }
+    cout << typeid(all_encrypted_files).name() << endl;
 
     return all_encrypted_files;
 }
@@ -224,10 +225,6 @@ bool FileManagement::shareFile(const Session& session, int fileID, const string&
     encrypted_file_map["last_modified"] = getCurrentTime();
     encrypted_file_map["owner_id"] = to_string(encrypted_file_row.owner.id);
 
-    for (auto& [key, value] : encrypted_file_map) {
-        cout << key << ": " << value << endl;
-    }
-
     // 5.2. Update the encrypted file in the database (use the alterAttributeFromModelByID function of database service)
     bool isUpdated = databaseService->alterAttributeFromModelByID(EncryptedFileModel, encrypted_file_row.id, encrypted_file_map);
 
@@ -236,10 +233,19 @@ bool FileManagement::shareFile(const Session& session, int fileID, const string&
     }
 
     // 6. Generate the SharedFile object
+	User shared_user;
+
+    for (auto& user : databaseService->getUsers()) {
+        if (user.student_id == student_id) {
+            shared_user = user;
+            break;
+        }
+    }
+
     SharedFile shared_file;
-    shared_file.id = encrypted_file_row.id;
+
     shared_file.encrypted_file = encrypted_file_row;
-    shared_file.shared_user = User();
+    shared_file.shared_user = shared_user;
     shared_file.date = getCurrentTime();
 
     // 7. Save the shared file in the database
