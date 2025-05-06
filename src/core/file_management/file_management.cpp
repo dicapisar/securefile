@@ -121,19 +121,35 @@ bool FileManagement::decryptFile(const Session& session, int fileID, const strin
     return true;
 }
 
-bool FileManagement::deleteFile(const Session& session, const string& file_name) {
+bool FileManagement::deleteFile(const Session& session, int fileID, const string& file_name) {
 
     // 1. Check if the session is valid
+    if (!session.is_logged) {
+        return false;
+    }
 
     // 2. Get the encrypted file from the database
+    optional<variant<User, EncryptedFile, SharedFile, MetadataFile, Report>> encrypted_file = databaseService->getModelByID(EncryptedFileModel, fileID);
+    if (!encrypted_file.has_value() || !holds_alternative<EncryptedFile>(*encrypted_file)) {
+        return false;
+    }
+
+    EncryptedFile encrypted_file_row = get<EncryptedFile>(*encrypted_file);
 
     // 3. Check if user of the session is the owner of the file
+    if (encrypted_file_row.owner.id != session.user_id) {
+        return false;
+    }
 
     // 4. Delete encrypted file using file service -> remove: you must use the file_path of the encrypted file
+    fileService->removeFile(encrypted_file_row.file_path);
 
     // 5. Delete the file from the database
+    databaseService->deleteRecordByID(EncryptedFileModel, fileID);
 
     // 6. Generate a report on database
+    // TODO: SAVE REPORT
+
     return true;
 }
 
