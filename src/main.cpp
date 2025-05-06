@@ -2,9 +2,9 @@
 #include <vector>
 #include <variant>
 #include <core/file_management/file_management.h>
-
-#include "core/file_management/file_management.h"
-#include "core/report_management/report_management.h"
+#include <core/user_management/user_manager.h>
+#include <limits>
+#include <core/report_management/report_management.h>
 
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
@@ -51,120 +51,9 @@ Dependencies loadDependenciesTest() {
 
     auto* database_service = new DatabaseService();
     database_service->load_SQL_file();
-    /**vector<User> users = database_service.getUsers();
-    for (const auto& user : users) {
-        cout << "ID: " << user.id << " | Nombre: " << user.name
-                << " | Email: " << user.email << " | Password: " << user.password
-                << " | Admin: " << (user.is_admin ? "Yes" : "No")
-                << " | Crated at: " << user.created_at << std::endl;
-    }
-
-    auto encryptedFileOpt = database_service.getEncryptedFilesByOwnerID(1);
-    if (encryptedFileOpt.has_value()) {
-        vector<EncryptedFile> encryptedFiles = encryptedFileOpt.value();
-        for (const auto& encryptedFile : encryptedFiles) {
-            cout << "\n📂 Encrypted File Found:\n";
-            cout << "ID: " << encryptedFile.id << " | Name: " << encryptedFile.file_name
-                    << " | Path: " << encryptedFile.file_path << endl;
-            cout << "👤 Owner: " << encryptedFile.owner.name << " | Owner Email: " << encryptedFile.owner.email << endl;
-        }
-    }
-
-    auto sharedEncryptedFileOpt = database_service.getSharedEncryptedFilesByUserID(2);
-    if (sharedEncryptedFileOpt.has_value()) {
-        vector<EncryptedFile> encryptedFiles = sharedEncryptedFileOpt.value();
-        for (const auto& encryptedFile : encryptedFiles) {
-            cout << "\n📂 Shared Encrypted File Found:\n";
-            cout << "ID: " << encryptedFile.id << " | Name: " << encryptedFile.file_name
-                    << " | Path: " << encryptedFile.file_path << endl;
-            cout << "👤 Owner: " << encryptedFile.owner.name << " | Owner Email: " << encryptedFile.owner.email << endl;
-        }
-    } **/
-
-    /*
-     * Encrypt
-     */
 
     auto* file_service = new FileService();
     auto* encrypt_service = new EncryptService();
-
-    /**
-    const string file_to_encrypt = "test.txt";
-    const string password = "password";
-
-    vector<unsigned char> file = file_service.readFile(file_to_encrypt);
-
-    if (file.empty()) {
-        cerr << "❌ Error reading file. \n" << endl;
-    }
-
-    vector<unsigned char> encrypted_file = encrypt_service.encryptAES(file, password);
-
-    file_service.createDirectory("./encrypted_files/");
-
-    const string output_file_name = "./encrypted_files/" + file_to_encrypt + ".enc";
-
-    file_service.writeFile(output_file_name, encrypted_file);
-
-    cout << "📁 File Encrypted Successfully at: " << output_file_name << endl;
-
-    **/
-
-    /*
-     * Decrypt
-     */
-
-    /**
-
-    string path_encrypted_file = "./encrypted_files/" + file_to_encrypt + ".enc";
-    vector<unsigned char> encrypted_file_to_decrypt = file_service.readFile(path_encrypted_file);
-
-    vector<unsigned char> decrypted_file = encrypt_service.decryptAES(encrypted_file_to_decrypt, password);
-
-    file_service.createDirectory("./decrypted_files/");
-
-    const string output_decrypted_file = "./decrypted_files/" + file_to_encrypt;
-
-    file_service.writeFile(output_decrypted_file, decrypted_file);
-
-    cout << "📂 File Decrypted Successfully at: " << output_file_name << endl;
-
-    auto user_test = database_service.getModelByID(UserModel, 1);
-
-    if (user_test && holds_alternative<User>(*user_test)) {
-        User u = get<User>(*user_test);
-        cout << "ID: " << u.id << "\n";
-    }
-
-    auto encrypted_file_test = database_service.getModelByID(EncryptedFileModel, 1);
-
-    if (encrypted_file_test && holds_alternative<EncryptedFile>(*encrypted_file_test)) {
-        EncryptedFile ef = get<EncryptedFile>(*encrypted_file_test);
-        cout << "ID Encrypted File: " << ef.id << "\n";
-    }
-
-    auto share_file_test = database_service.getModelByID(SharedFileModel, 1);
-
-    if (share_file_test && holds_alternative<SharedFile>(*share_file_test)) {
-        SharedFile sf = get<SharedFile>(*share_file_test);
-        cout << "ID Shared File: " << sf.id << "\n";
-    }
-
-    auto metadata_file_test = database_service.getModelByID(MetadataFileModel, 1);
-
-    if (metadata_file_test && holds_alternative<MetadataFile>(*metadata_file_test)) {
-        MetadataFile mf = get<MetadataFile>(*metadata_file_test);
-        cout << "ID Metadata File: " << mf.id << "\n";
-    }
-
-
-    map<string, string> attributes = {{"name", "Test of update  "}};
-    bool isUptaded = database_service.alterAttributeFromModelByID(UserModel, 2, attributes);
-
-    if (!isUptaded) cout << "❌ Error updating";
-
-    **/
-
 
     cout << "🎉 All Libraries Working Successfully.\n";
 
@@ -177,14 +66,16 @@ void start() {
     Dependencies dependencies = loadDependenciesTest();
 
     Auth auth{ dependencies.database, dependencies.encrypt};
+    UserManager user_manager{ dependencies.database, dependencies.encrypt};
     ReportManagement report_management(dependencies.database);
     FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file, (&report_management)};
     Session session;
     bool isLoggedIn = false;
+    bool isRunning = true;
 
     UI::showWelcomeMessage();
 
-    while (true) {
+    while (isRunning) {
         // Check if the user is logged in
         if (!isLoggedIn) {
             std::vector<std::string> loginOptions = {
@@ -220,6 +111,199 @@ void start() {
             } else {
                 break;
             }
+        }
+
+        if (session.is_admin) {
+            bool seeManageUsers = false;
+            UI::showMessage("Do you want to manage users?", MessageType::Warning);
+
+            std::vector<std::string> questionOptions = {
+            "Yes", "No"
+            };
+
+            int optionSelected = UI::showMenu(questionOptions);
+            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+            if (optionSelected == 1) {
+                seeManageUsers = true;
+
+                while (seeManageUsers) {
+                    UI::showMessage("Managing users...", MessageType::Info);
+                    std::vector<std::string> userManagerOptions = {
+                        "Create User",
+                        "Update User",
+                        "Delete User",
+                        "List Users",
+                        "Go to Main Menu"
+                    };
+                    optionSelected = UI::showMenu(userManagerOptions);
+
+                    UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+                    switch (optionSelected) {
+                        case 1: {
+                            UI::showMessage("Create User...", MessageType::Info);
+
+                            User newUser = User();
+
+                            UI::showMessage("Please enter the student ID: ", MessageType::Info);
+                            string student_id;
+                            cin >> student_id;
+                            newUser.student_id = student_id;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            UI::showMessage("Please enter the password: ", MessageType::Info); // TODO: validate that the password is strong
+                            string password;
+                            std::getline(std::cin, password);
+                            newUser.password = password;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            UI::showMessage("Please enter the name: ", MessageType::Info);
+                            string name;
+                            std::getline(std::cin, name);
+                            newUser.name = name;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            UI::showMessage("Please enter the email: ", MessageType::Info);
+                            string email;
+                            std::getline(std::cin, email);
+                            newUser.email = email;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            bool is_ok = user_manager.addUser(session, newUser);
+
+                            if (is_ok) {
+                                UI::showMessage("User created successfully", MessageType::Success);
+                            } else {
+                                UI::showMessage("Error creating user, please try again", MessageType::Error);
+                            }
+
+                            break;
+                        }
+                        case 2: {
+                            UI::showMessage("Update User...", MessageType::Info);
+
+                            UI::showMessage("Please enter the student ID: ", MessageType::Info);
+                            string student_id;
+                            cin >> student_id;
+
+                            optional<User> user = user_manager.getUser(session, student_id);
+                            if (!user.has_value()) {
+                                UI::showMessage("User not found", MessageType::Error);
+                                break;
+                            }
+
+                            User userUpdated = user.value();
+
+                            UI::showMessage("Please enter the new student id: ", MessageType::Info);
+                            string new_student_id;
+                            cin >> new_student_id;
+
+                            UI::showMessage("Please enter the new name: ", MessageType::Info);
+                            string new_name;
+                            cin >> new_name;
+
+                            UI::showMessage("Please enter the new email: ", MessageType::Info);
+                            string new_email;
+                            cin >> new_email;
+
+                            userUpdated.student_id = student_id;
+                            userUpdated.name = new_name;
+                            userUpdated.email = new_email;
+
+                            bool is_ok = user_manager.updateUser(session, userUpdated);
+
+                            if (is_ok) {
+                                UI::showMessage("User updated successfully", MessageType::Success);
+                            } else {
+                                UI::showMessage("Error updated user, please try again", MessageType::Error);
+                            }
+
+                            break;
+                        }
+                        case 3: {
+                            UI::showMessage("Delete User...", MessageType::Info);
+
+                            UI::showMessage("Please enter the student ID to delete: ", MessageType::Info);
+                            string student_id;
+                            cin >> student_id;
+
+                            optional<User> user = user_manager.getUser(session, student_id);
+                            if (!user.has_value()) {
+                                UI::showMessage("User not found", MessageType::Error);
+                                break;
+                            }
+
+                            UI::showMessage("Are you sure you want to delete the user?", MessageType::Warning);
+                            questionOptions = {
+                                "Yes", "No"
+                            };
+                            optionSelected = UI::showMenu(questionOptions);
+                            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+                            if (optionSelected == 2) {
+                                UI::showMessage("User not deleted", MessageType::Info);
+                                break;
+                            }
+
+                            bool is_ok = user_manager.deleteUser(session, student_id);
+
+                            if (is_ok) {
+                                UI::showMessage("User deleted successfully", MessageType::Success);
+                            } else {
+                                UI::showMessage("Error deleting user, please try again", MessageType::Error);
+                            }
+
+                            break;
+                        }
+                        case 4: {
+                            UI::showMessage("List Users...", MessageType::Info);
+
+                            optional<vector<User>> users = user_manager.getListUsers(session);
+                            if (!users.has_value()) {
+                                UI::showMessage("No users found", MessageType::Warning);
+                                break;
+                            }
+
+                            // Show the list of users
+                            vector<string> headers = {"ID", "Student ID", "Name", "Email", "Is Admin"};
+                            vector<map<string,string>> rows;
+                            int index = 1;
+                            for (const auto& user : *users) {
+                                map<string,string> row;
+                                row["ID"] = to_string(index);
+                                row["Student ID"] = user.student_id;
+                                row["Name"] = user.name;
+                                row["Email"] = user.email;
+                                row["Is Admin"] = user.is_admin ? "Yes" : "No";
+                                rows.push_back(row);
+                                index++;
+                            }
+                            UI::showTableWithInformation(headers, rows);
+
+                            break;
+                        }
+                        case 5: {
+                            UI::showMessage("Going to Main Menu...", MessageType::Info);
+                            seeManageUsers = false;
+                            break;
+                        }
+                        default: {
+                            UI::showMessage("Invalid option", MessageType::Error);
+                        }
+                    }
+
+                }
+            } else {
+                seeManageUsers = false;
+            }
+
+
+
+            UI::showMessage("Continuing to file management...", MessageType::Info);
         }
 
         // Show the main menu if the user is logged in

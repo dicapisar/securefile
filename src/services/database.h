@@ -49,6 +49,11 @@ class DatabaseService {
       bool saveEncryptedFile(const EncryptedFile &encryptedFile);
       bool saveSharedFile(const SharedFile &sharedFile);
       bool saveReport(const Report &report);
+      bool createUser(const User &user);
+      bool deleteUser(const string &student_id);
+      bool updateUser(const User &user);
+      bool updateUserPassword(const string &student_id, const string &new_password);
+
 };
 
 
