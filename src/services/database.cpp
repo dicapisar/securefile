@@ -328,6 +328,7 @@ bool DatabaseService::alterAttributeFromModelByID(Models model_name, int id, con
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         cerr << "❌ Error making consult: " << sqlite3_errmsg(db) << endl;
+        cerr << "Generated SQL Query: " << sql << endl;  //TODO To Delete after testing
         return false;
     }
 
