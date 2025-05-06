@@ -15,6 +15,7 @@ enum class MessageType {
 
 class UI {
 public:
+    static void clearScreen();
     static void showWelcomeMessage();
     static void showExitMessage();
     static int showMenu(const std::vector<std::string>& options);
