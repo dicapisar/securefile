@@ -184,7 +184,6 @@ optional<vector<EncryptedFile>> FileManagement::getListEncryptedFiles(const Sess
             all_encrypted_files.push_back(file);
         }
     }
-    cout << typeid(all_encrypted_files).name() << endl;
 
     return all_encrypted_files;
 }
