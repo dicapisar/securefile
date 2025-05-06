@@ -21,12 +21,14 @@ using namespace std;
 #include "ui/ui.h"
 
 class Dependencies {
-    public:
-        DatabaseService* database;
-        EncryptService* encrypt;
-        FileService* file;
+public:
+    DatabaseService *database;
+    EncryptService *encrypt;
+    FileService *file;
 
-    Dependencies(DatabaseService* database, EncryptService* encrypt, FileService* file) : database(database), encrypt(encrypt), file(file) {}
+    Dependencies(DatabaseService *database, EncryptService *encrypt, FileService *file) : database(database),
+        encrypt(encrypt), file(file) {
+    }
 
     ~Dependencies() {
         delete database;
@@ -36,7 +38,6 @@ class Dependencies {
 };
 
 Dependencies loadDependenciesTest() {
-
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -49,11 +50,11 @@ Dependencies loadDependenciesTest() {
 
     cout << "👀 Validating installation of Libraries...\n";
 
-    auto* database_service = new DatabaseService();
+    auto *database_service = new DatabaseService();
     database_service->load_SQL_file();
 
-    auto* file_service = new FileService();
-    auto* encrypt_service = new EncryptService();
+    auto *file_service = new FileService();
+    auto *encrypt_service = new EncryptService();
 
     cout << "🎉 All Libraries Working Successfully.\n";
 
@@ -65,10 +66,12 @@ Dependencies loadDependenciesTest() {
 void start() {
     Dependencies dependencies = loadDependenciesTest();
 
-    Auth auth{ dependencies.database, dependencies.encrypt};
-    UserManager user_manager{ dependencies.database, dependencies.encrypt};
+    Auth auth{dependencies.database, dependencies.encrypt};
+    UserManager user_manager{dependencies.database, dependencies.encrypt};
     ReportManagement report_management(dependencies.database);
-    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file, (&report_management)};
+    FileManagement file_management{
+        dependencies.database, dependencies.encrypt, dependencies.file, (&report_management)
+    };
     Session session;
     bool isLoggedIn = false;
     bool isRunning = true;
@@ -118,7 +121,7 @@ void start() {
             UI::showMessage("Do you want to manage users?", MessageType::Warning);
 
             std::vector<std::string> questionOptions = {
-            "Yes", "No"
+                "Yes", "No"
             };
 
             int optionSelected = UI::showMenu(questionOptions);
@@ -153,7 +156,8 @@ void start() {
 
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                            UI::showMessage("Please enter the password: ", MessageType::Info); // TODO: validate that the password is strong
+                            UI::showMessage("Please enter the password: ", MessageType::Info);
+                            // TODO: validate that the password is strong
                             string password;
                             std::getline(std::cin, password);
                             newUser.password = password;
@@ -262,7 +266,7 @@ void start() {
                         case 4: {
                             UI::showMessage("List Users...", MessageType::Info);
 
-                            optional<vector<User>> users = user_manager.getListUsers(session);
+                            optional<vector<User> > users = user_manager.getListUsers(session);
                             if (!users.has_value()) {
                                 UI::showMessage("No users found", MessageType::Warning);
                                 break;
@@ -270,10 +274,10 @@ void start() {
 
                             // Show the list of users
                             vector<string> headers = {"ID", "Student ID", "Name", "Email", "Is Admin"};
-                            vector<map<string,string>> rows;
+                            vector<map<string, string> > rows;
                             int index = 1;
-                            for (const auto& user : *users) {
-                                map<string,string> row;
+                            for (const auto &user: *users) {
+                                map<string, string> row;
                                 row["ID"] = to_string(index);
                                 row["Student ID"] = user.student_id;
                                 row["Name"] = user.name;
@@ -295,314 +299,324 @@ void start() {
                             UI::showMessage("Invalid option", MessageType::Error);
                         }
                     }
-
                 }
             } else {
                 seeManageUsers = false;
             }
 
 
-
             UI::showMessage("Continuing to file management...", MessageType::Info);
         }
 
-        // Show the main menu if the user is logged in
-        std::vector<std::string> mainMenuOptions = {
-            "Encrypt File",
-            "Decrypt File",
-            "Delete File",
-            "List Files",
-            "Share File",
-            "See Report",
-            "Logout"
-        };
 
-        int optionSelected = UI::showMenu(mainMenuOptions);
-        UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+        bool stillRunning = true;
+        while (stillRunning && isLoggedIn) {
+            // Show the main menu if the user is logged in
+            std::vector<std::string> mainMenuOptions = {
+                "Encrypt File",
+                "Decrypt File",
+                "Delete File",
+                "List Files",
+                "Share File",
+                "See Report",
+                "Logout"
+            };
 
-        switch (optionSelected) {
-            case 1: {
-                UI::showMessage("Encrypting file...", MessageType::Info);
+            int optionSelected = UI::showMenu(mainMenuOptions);
+            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
 
-                // Request the file name
-                UI::showMessage("Please enter the file name to encrypt: ", MessageType::Info);
-                string file_name;
-                cin >> file_name;
+            switch (optionSelected) {
+                case 1: {
+                    UI::showMessage("Encrypting file...", MessageType::Info);
 
-                // Request the password
-                UI::showMessage("Please enter the password: ", MessageType::Info);
-                string password;
-                cin >> password;
+                    // Request the file name
+                    UI::showMessage("Please enter the file name to encrypt: ", MessageType::Info);
+                    string file_name;
+                    cin >> file_name;
 
-                bool is_ok = file_management.encryptFile(session, file_name, password);
-
-                if (is_ok) {
-                    UI::showMessage("File encrypted successfully", MessageType::Success);
-                } else {
-                    UI::showMessage("Error encrypting file", MessageType::Error);
-                }
-                break;
-            }
-            case 2: {
-                UI::showMessage("Decrypting file...", MessageType::Info);
-
-                // Get all encrypted files allowed to the user
-                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
-
-                if (!encrypted_files.has_value()) {
-                    UI::showMessage("No encrypted files found", MessageType::Warning);
-                    break;
-                }
-
-                // Show the list of encrypted files
-                vector<string> headers = {"ID", "File Name", "Owner"};
-                vector<map<string,string>> rows;
-
-                int index = 1;
-                for (const auto& file : *encrypted_files) {
-                    map<string,string> row;
-                    row["ID"] = to_string(index);
-                    row["File Name"] = file.file_name;
-                    row["Owner"] = file.owner.name;
-                    rows.push_back(row);
-                    index++;
-                }
-                UI::showTableWithInformation(headers, rows);
-
-                UI::showMessage("Please select the file ID to decrypt: ", MessageType::Info);
-                int file_id;
-                cin >> file_id;
-
-                if (file_id < 1 || file_id > rows.size()) {
-                    UI::showMessage("Invalid file ID", MessageType::Error);
-                    break;
-                }
-
-                EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
-
-                if ( fileSelected.password != "" && fileSelected.owner.id != session.user_id) {
+                    // Request the password
                     UI::showMessage("Please enter the password: ", MessageType::Info);
                     string password;
                     cin >> password;
 
-                    if (fileSelected.password != password) {
-                        UI::showMessage("Invalid password", MessageType::Error);
+                    bool is_ok = file_management.encryptFile(session, file_name, password);
+
+                    if (is_ok) {
+                        UI::showMessage("File encrypted successfully", MessageType::Success);
+                    } else {
+                        UI::showMessage("Error encrypting file", MessageType::Error);
+                    }
+                    break;
+                }
+                case 2: {
+                    UI::showMessage("Decrypting file...", MessageType::Info);
+
+                    // Get all encrypted files allowed to the user
+                    optional<vector<EncryptedFile> > encrypted_files = file_management.getListEncryptedFiles(session);
+
+                    if (!encrypted_files.has_value()) {
+                        UI::showMessage("No encrypted files found", MessageType::Warning);
                         break;
                     }
-                }
 
-                bool isOK = file_management.decryptFile(session, fileSelected.id, fileSelected.password);
+                    // Show the list of encrypted files
+                    vector<string> headers = {"ID", "File Name", "Owner"};
+                    vector<map<string, string> > rows;
 
-                if (!isOK) {
-                    UI::showMessage("Error decrypting file", MessageType::Error);
-                } else {
-                    UI::showMessage("File decrypted successfully", MessageType::Success);
-                }
-                break;
-            }
-            case 3: {
-                UI::showMessage("Deleting file...", MessageType::Info);
-
-                // 1. Get all encrypted files allowed to the user
-                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
-
-                if (!encrypted_files.has_value()) {
-                    UI::showMessage("No encrypted files found", MessageType::Warning);
-                    break;
-                }
-                // 2. remove the encrypted files which the owner is not the user of the session
-                vector<string> headers = {"ID", "File Name"};
-                vector<map<string,string>> rows;
-
-                int index = 1;
-                for (const auto& file : *encrypted_files) {
-                    if (file.owner.id == session.user_id) {
-                        map<string,string> row;
+                    int index = 1;
+                    for (const auto &file: *encrypted_files) {
+                        map<string, string> row;
                         row["ID"] = to_string(index);
                         row["File Name"] = file.file_name;
+                        row["Owner"] = file.owner.name;
                         rows.push_back(row);
+                        index++;
                     }
-                    index++;
-                }
+                    UI::showTableWithInformation(headers, rows);
 
-                // 3. Show the list of encrypted files
-                UI::showTableWithInformation(headers, rows);
+                    UI::showMessage("Please select the file ID to decrypt: ", MessageType::Info);
+                    int file_id;
+                    cin >> file_id;
 
-                // 4. Request the file ID to delete
-                UI::showMessage("Please select the file ID to delete: ", MessageType::Info);
-                int file_id;
-                cin >> file_id;
-
-                if (file_id < 1 || file_id > rows.size()) {
-                    UI::showMessage("Invalid file ID", MessageType::Error);
-                    break;
-                }
-
-                // 5. Get the path of the file selected
-                EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
-
-                // 6. Call the delete function of file management
-				bool isOK = file_management.deleteFile(session, fileSelected.id, fileSelected.file_name);
-
-                // 7. show the message of success or error
-                if (!isOK) {
-                    UI::showMessage("Error deleting file", MessageType::Error);
-                } else {
-                    UI::showMessage("File deleted successfully", MessageType::Success);
-                }
-                break;
-            }
-            case 4: {
-                UI::showMessage("Listing files...", MessageType::Info);
-                // Get all encrypted files allowed to the user
-                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
-
-                if (!encrypted_files.has_value()) {
-                    UI::showMessage("No encrypted files found", MessageType::Warning);
-                    break;
-                }
-
-                // Show the list of encrypted files
-                vector<string> headers = {"ID", "File Name", "Owner"};
-                vector<map<string,string>> rows;
-
-                int index = 1;
-                for (const auto& file : *encrypted_files) {
-                    map<string,string> row;
-                    row["ID"] = to_string(index);
-                    row["File Name"] = file.file_name;
-                    row["Owner"] = file.owner.name;
-                    rows.push_back(row);
-                    index++;
-                }
-                UI::showTableWithInformation(headers, rows);
-                break;
-            }
-            case 5: {
-                UI::showMessage("Sharing file...", MessageType::Info);
-
-                // 1. Get all encrypted files allowed to the user
-                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
-
-                if (!encrypted_files.has_value()) {
-                    UI::showMessage("No encrypted files found", MessageType::Warning);
-                    break;
-                }
-
-                // 2. remove the encrypted files which the owner is not the user of the session
-                vector<string> headers = {"ID", "File Name"};
-                vector<map<string,string>> rows;
-
-                int index = 1;
-                for (const auto& file : *encrypted_files) {
-                    if (file.owner.id == session.user_id) {
-                        map<string,string> row;
-                        row["ID"] = to_string(index);
-                        row["File Name"] = file.file_name;
-                        rows.push_back(row);
-                    }
-                    index++;
-                }
-
-                // 3. Show the list of encrypted files
-                UI::showTableWithInformation(headers, rows);
-
-                // 4. Request the file ID to share
-                UI::showMessage("Please select the file ID to share: ", MessageType::Info);
-                int file_id;
-                cin >> file_id;
-
-                if (file_id < 1 || file_id > rows.size()) {
-                    UI::showMessage("Invalid file ID", MessageType::Error);
-                    break;
-                }
-
-                // 5. Get the encrypted file selected
-                EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
-
-                // 6. Validate if the encrypted file has password
-                if (fileSelected.password == "") {;
-                    UI::showMessage("The file does not have a password, please enter a password: ", MessageType::Info);
-                    string password;
-                    cin >> password;
-                }
-
-                // 7. If the file has password, request the password
-                if (fileSelected.password != "") {
-                    UI::showMessage("The file has a password, please enter the password: ", MessageType::Info);
-                    string password;
-                    cin >> password;
-
-                    if (fileSelected.password != password) {
-                        UI::showMessage("Invalid password", MessageType::Error);
+                    if (file_id < 1 || file_id > rows.size()) {
+                        UI::showMessage("Invalid file ID", MessageType::Error);
                         break;
                     }
-                }
 
-                // 8. Request the student ID to share
-                UI::showMessage("Please enter the student ID to share: ", MessageType::Info);
-                string student_id;
-                cin >> student_id;
+                    EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
 
-                // 9. Get the path of the file selected
-				// ??????
+                    if (fileSelected.password != "" && fileSelected.owner.id != session.user_id) {
+                        UI::showMessage("Please enter the password: ", MessageType::Info);
+                        string password;
+                        cin >> password;
 
-                // 10. Call the share function of file management
-                bool isOK = file_management.shareFile(session, fileSelected.id , fileSelected.file_name, student_id, fileSelected.password);
+                        if (fileSelected.password != password) {
+                            UI::showMessage("Invalid password", MessageType::Error);
+                            break;
+                        }
+                    }
 
-                // 11. show the message of success or error
-                if (!isOK) {
-                    UI::showMessage("Error sharing file", MessageType::Error);
-                } else {
-                    UI::showMessage("File shared successfully", MessageType::Success);
-                }
-                break;
-            }
-            case 6: {
-                UI::showMessage("Generating report...", MessageType::Info);
+                    bool isOK = file_management.decryptFile(session, fileSelected.id, fileSelected.password);
 
-                // 1. Get all reports allowed to the user
-                optional<vector<Report>> reports = report_management.getListReports(session);
-
-                // 2. Show the list of reports
-                if (!reports.has_value()) {
-                    UI::showMessage("No Reports found", MessageType::Warning);
+                    if (!isOK) {
+                        UI::showMessage("Error decrypting file", MessageType::Error);
+                    } else {
+                        UI::showMessage("File decrypted successfully", MessageType::Success);
+                    }
                     break;
                 }
+                case 3: {
+                    UI::showMessage("Deleting file...", MessageType::Info);
 
-                vector<string> headers = {
-                    "ID", "ID File", "File Name", "User ID",
-                    "Owner", "Student ID", "Action", "Date Action"
-                };
-                vector<map<string,string>> rows;
-                int index = 1;
-                for (const auto& rpt : *reports) {
-                    map<string,string> row;
-                    row["ID"]          = to_string(index++);
-                    row["ID File"]     = to_string(rpt.encrypted_file_id);
-                    row["File Name"]   = rpt.encrypted_file_name;
-                    row["User ID"]     = to_string(rpt.user_id);
-                    row["Owner"]       = rpt.user_name;
-                    row["Student ID"]  = rpt.student_id;
-                    row["Action"]      = (rpt.action == CREATE  ? "CREATE"  :
-                                          rpt.action == DELETE  ? "DELETE"  :
-                                          rpt.action == ENCRYPT ? "ENCRYPT" :
-                                          rpt.action == DECRYPT ? "DECRYPT" :
-                                                                  "SHARE");
-                    row["Date Action"] = rpt.action_date;
-                    rows.push_back(row);
+                    // 1. Get all encrypted files allowed to the user
+                    optional<vector<EncryptedFile> > encrypted_files = file_management.getListEncryptedFiles(session);
+
+                    if (!encrypted_files.has_value()) {
+                        UI::showMessage("No encrypted files found", MessageType::Warning);
+                        break;
+                    }
+                    // 2. remove the encrypted files which the owner is not the user of the session
+                    vector<string> headers = {"ID", "File Name"};
+                    vector<map<string, string> > rows;
+
+                    int index = 1;
+                    for (const auto &file: *encrypted_files) {
+                        if (file.owner.id == session.user_id) {
+                            map<string, string> row;
+                            row["ID"] = to_string(index);
+                            row["File Name"] = file.file_name;
+                            rows.push_back(row);
+                        }
+                        index++;
+                    }
+
+                    // 3. Show the list of encrypted files
+                    UI::showTableWithInformation(headers, rows);
+
+                    // 4. Request the file ID to delete
+                    UI::showMessage("Please select the file ID to delete: ", MessageType::Info);
+                    int file_id;
+                    cin >> file_id;
+
+                    if (file_id < 1 || file_id > rows.size()) {
+                        UI::showMessage("Invalid file ID", MessageType::Error);
+                        break;
+                    }
+
+                    // 5. Get the path of the file selected
+                    EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
+
+                    // 6. Call the delete function of file management
+                    bool isOK = file_management.deleteFile(session, fileSelected.id, fileSelected.file_name);
+
+                    // 7. show the message of success or error
+                    if (!isOK) {
+                        UI::showMessage("Error deleting file", MessageType::Error);
+                    } else {
+                        UI::showMessage("File deleted successfully", MessageType::Success);
+                    }
+                    break;
                 }
-                UI::showTableWithInformation(headers, rows);
+                case 4: {
+                    UI::showMessage("Listing files...", MessageType::Info);
+                    // Get all encrypted files allowed to the user
+                    optional<vector<EncryptedFile> > encrypted_files = file_management.getListEncryptedFiles(session);
 
-                break;
-            }
-            case 7: {
-                isLoggedIn = false;
-                UI::showMessage("Logging out...", MessageType::Success);
-                break;
-            }
-            default: {
-                UI::showMessage("Invalid option", MessageType::Error);
+                    if (!encrypted_files.has_value()) {
+                        UI::showMessage("No encrypted files found", MessageType::Warning);
+                        break;
+                    }
+
+                    // Show the list of encrypted files
+                    vector<string> headers = {"ID", "File Name", "Owner"};
+                    vector<map<string, string> > rows;
+
+                    int index = 1;
+                    for (const auto &file: *encrypted_files) {
+                        map<string, string> row;
+                        row["ID"] = to_string(index);
+                        row["File Name"] = file.file_name;
+                        row["Owner"] = file.owner.name;
+                        rows.push_back(row);
+                        index++;
+                    }
+                    UI::showTableWithInformation(headers, rows);
+                    break;
+                }
+                case 5: {
+                    UI::showMessage("Sharing file...", MessageType::Info);
+
+                    // 1. Get all encrypted files allowed to the user
+                    optional<vector<EncryptedFile> > encrypted_files = file_management.getListEncryptedFiles(session);
+
+                    if (!encrypted_files.has_value()) {
+                        UI::showMessage("No encrypted files found", MessageType::Warning);
+                        break;
+                    }
+
+                    // 2. remove the encrypted files which the owner is not the user of the session
+                    vector<string> headers = {"ID", "File Name"};
+                    vector<map<string, string> > rows;
+
+                    int index = 1;
+                    for (const auto &file: *encrypted_files) {
+                        if (file.owner.id == session.user_id) {
+                            map<string, string> row;
+                            row["ID"] = to_string(index);
+                            row["File Name"] = file.file_name;
+                            rows.push_back(row);
+                        }
+                        index++;
+                    }
+
+                    // 3. Show the list of encrypted files
+                    UI::showTableWithInformation(headers, rows);
+
+                    // 4. Request the file ID to share
+                    UI::showMessage("Please select the file ID to share: ", MessageType::Info);
+                    int file_id;
+                    cin >> file_id;
+
+                    if (file_id < 1 || file_id > rows.size()) {
+                        UI::showMessage("Invalid file ID", MessageType::Error);
+                        break;
+                    }
+
+                    // 5. Get the encrypted file selected
+                    EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
+
+                    // 6. Validate if the encrypted file has password
+                    if (fileSelected.password == "") {
+                        ;
+                        UI::showMessage("The file does not have a password, please enter a password: ",
+                                        MessageType::Info);
+                        string password;
+                        cin >> password;
+                    }
+
+                    // 7. If the file has password, request the password
+                    if (fileSelected.password != "") {
+                        UI::showMessage("The file has a password, please enter the password: ", MessageType::Info);
+                        string password;
+                        cin >> password;
+
+                        if (fileSelected.password != password) {
+                            UI::showMessage("Invalid password", MessageType::Error);
+                            break;
+                        }
+                    }
+
+                    // 8. Request the student ID to share
+                    UI::showMessage("Please enter the student ID to share: ", MessageType::Info);
+                    string student_id;
+                    cin >> student_id;
+
+                    // 9. Get the path of the file selected
+                    // ??????
+
+                    // 10. Call the share function of file management
+                    bool isOK = file_management.shareFile(session, fileSelected.id, fileSelected.file_name, student_id,
+                                                          fileSelected.password);
+
+                    // 11. show the message of success or error
+                    if (!isOK) {
+                        UI::showMessage("Error sharing file", MessageType::Error);
+                    } else {
+                        UI::showMessage("File shared successfully", MessageType::Success);
+                    }
+                    break;
+                }
+                case 6: {
+                    UI::showMessage("Generating report...", MessageType::Info);
+
+                    // 1. Get all reports allowed to the user
+                    optional<vector<Report> > reports = report_management.getListReports(session);
+
+                    // 2. Show the list of reports
+                    if (!reports.has_value()) {
+                        UI::showMessage("No Reports found", MessageType::Warning);
+                        break;
+                    }
+
+                    vector<string> headers = {
+                        "ID", "ID File", "File Name", "User ID",
+                        "Owner", "Student ID", "Action", "Date Action"
+                    };
+                    vector<map<string, string> > rows;
+                    int index = 1;
+                    for (const auto &rpt: *reports) {
+                        map<string, string> row;
+                        row["ID"] = to_string(index++);
+                        row["ID File"] = to_string(rpt.encrypted_file_id);
+                        row["File Name"] = rpt.encrypted_file_name;
+                        row["User ID"] = to_string(rpt.user_id);
+                        row["Owner"] = rpt.user_name;
+                        row["Student ID"] = rpt.student_id;
+                        row["Action"] = (rpt.action == CREATE
+                                             ? "CREATE"
+                                             : rpt.action == DELETE
+                                                   ? "DELETE"
+                                                   : rpt.action == ENCRYPT
+                                                         ? "ENCRYPT"
+                                                         : rpt.action == DECRYPT
+                                                               ? "DECRYPT"
+                                                               : "SHARE");
+                        row["Date Action"] = rpt.action_date;
+                        rows.push_back(row);
+                    }
+                    UI::showTableWithInformation(headers, rows);
+
+                    break;
+                }
+                case 7: {
+                    isLoggedIn = false;
+                    stillRunning = false;
+                    UI::showMessage("Logging out...", MessageType::Success);
+                    break;
+                }
+                default: {
+                    UI::showMessage("Invalid option", MessageType::Error);
+                }
             }
         }
 
