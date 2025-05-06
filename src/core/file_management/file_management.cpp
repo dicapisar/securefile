@@ -76,17 +76,27 @@ bool FileManagement::encryptFile(const Session& session, const string& file_name
     bool isSaved = databaseService->saveEncryptedFile(encryptedFile);
 
     if (isSaved) {
-        //databaseService->getEncryptedFilesByOwnerID(session.user_id);
+        optional<vector<EncryptedFile>> encryptedFiles = databaseService->getEncryptedFilesByOwnerID(session.user_id);
 
-        Report report = Report();
-        report.encrypted_file_id = 0;
-        report.encrypted_file_name = encryptedFile.file_name;
-        report.user_id = session.user_id;
-        report.user_name = session.user_name;
-        report.student_id = session.user_student_id;
-        report.action = Actions::CREATE;
+        if (encryptedFiles.has_value()) {
 
-        reportManagement->createReport(report);
+            for (const auto& file : *encryptedFiles) {
+                if (file.file_name == file_name) {
+                    encryptedFile.id = file.id;
+                    break;
+                }
+            }
+
+            Report report = Report();
+            report.encrypted_file_id = encryptedFile.id;
+            report.encrypted_file_name = encryptedFile.file_name;
+            report.user_id = session.user_id;
+            report.user_name = session.user_name;
+            report.student_id = session.user_student_id;
+            report.action = Actions::CREATE;
+
+            reportManagement->createReport(report);
+        }
     }
 
     return isSaved;
@@ -130,7 +140,15 @@ bool FileManagement::decryptFile(const Session& session, int fileID, const strin
 
     fileService->writeFile(output_decrypted_file, decrypted_file);
 
-    // TODO: SAVE REPORT
+    Report report = Report();
+    report.encrypted_file_id = fileID;
+    report.encrypted_file_name = encrypted_file_row.file_name;
+    report.user_id = session.user_id;
+    report.user_name = session.user_name;
+    report.student_id = session.user_student_id;
+    report.action = Actions::DECRYPT;
+
+    reportManagement->createReport(report);
 
     return true;
 }
