@@ -13,13 +13,8 @@ bool ReportManagement::createReport(const Report& report) {
     // 1. Create the report using the database service
     bool OkReport = database->saveReport(report);
     // 2. Check if the report was created successfully
-    if (OkReport)  {
 
-        return false;
-    }
-    // 3. If the report was created successfully, return true
-
-    return true;
+    return OkReport;
 }
 
 optional<vector<Report>> ReportManagement::getListReports(const Session& session) {
