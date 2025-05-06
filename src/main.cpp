@@ -394,27 +394,80 @@ void start() {
                 UI::showMessage("Sharing file...", MessageType::Info);
 
                 // 1. Get all encrypted files allowed to the user
+                optional<vector<EncryptedFile>> encrypted_files = file_management.getListEncryptedFiles(session);
+
+                if (!encrypted_files.has_value()) {
+                    UI::showMessage("No encrypted files found", MessageType::Warning);
+                    break;
+                }
 
                 // 2. remove the encrypted files which the owner is not the user of the session
+                vector<string> headers = {"ID", "File Name"};
+                vector<map<string,string>> rows;
+
+                int index = 1;
+                for (const auto& file : *encrypted_files) {
+                    if (file.owner.id == session.user_id) {
+                        map<string,string> row;
+                        row["ID"] = to_string(index);
+                        row["File Name"] = file.file_name;
+                        rows.push_back(row);
+                    }
+                    index++;
+                }
 
                 // 3. Show the list of encrypted files
+                UI::showTableWithInformation(headers, rows);
 
                 // 4. Request the file ID to share
+                UI::showMessage("Please select the file ID to share: ", MessageType::Info);
+                int file_id;
+                cin >> file_id;
+
+                if (file_id < 1 || file_id > rows.size()) {
+                    UI::showMessage("Invalid file ID", MessageType::Error);
+                    break;
+                }
 
                 // 5. Get the encrypted file selected
+                EncryptedFile fileSelected = encrypted_files.value()[file_id - 1];
 
                 // 6. Validate if the encrypted file has password
+                if (fileSelected.password == "") {;
+                    UI::showMessage("The file does not have a password, please enter a password: ", MessageType::Info);
+                    string password;
+                    cin >> password;
+                }
 
                 // 7. If the file has password, request the password
+                if (fileSelected.password != "") {
+                    UI::showMessage("The file has a password, please enter the password: ", MessageType::Info);
+                    string password;
+                    cin >> password;
+
+                    if (fileSelected.password != password) {
+                        UI::showMessage("Invalid password", MessageType::Error);
+                        break;
+                    }
+                }
 
                 // 8. Request the student ID to share
+                UI::showMessage("Please enter the student ID to share: ", MessageType::Info);
+                string student_id;
+                cin >> student_id;
 
                 // 9. Get the path of the file selected
+				// ??????
 
                 // 10. Call the share function of file management
+                bool isOK = file_management.shareFile(session, fileSelected.id , fileSelected.file_name, student_id, fileSelected.password);
 
                 // 11. show the message of success or error
-
+                if (!isOK) {
+                    UI::showMessage("Error sharing file", MessageType::Error);
+                } else {
+                    UI::showMessage("File shared successfully", MessageType::Success);
+                }
                 break;
             }
             case 6: {
