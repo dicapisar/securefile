@@ -3,6 +3,7 @@
 #include <variant>
 #include <core/file_management/file_management.h>
 
+#include "core/file_management/file_management.h"
 #include "core/report_management/report_management.h"
 
 #ifdef _WIN32
@@ -177,7 +178,7 @@ void start() {
 
     Auth auth{ dependencies.database, dependencies.encrypt};
     ReportManagement report_management(dependencies.database);
-    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file };
+    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file, (&report_management)};
     Session session;
     bool isLoggedIn = false;
 

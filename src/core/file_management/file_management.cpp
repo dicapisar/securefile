@@ -83,7 +83,7 @@ bool FileManagement::encryptFile(const Session& session, const string& file_name
         report.encrypted_file_name = encryptedFile.file_name;
         report.user_id = session.user_id;
         report.user_name = session.user_name;
-        report.student_id = session.student_id;
+        report.student_id = session.user_student_id;
         report.action = Actions::CREATE;
 
         reportManagement->createReport(report);
