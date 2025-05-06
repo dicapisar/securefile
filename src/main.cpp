@@ -4,6 +4,7 @@
 #include <core/file_management/file_management.h>
 #include <core/user_management/user_manager.h>
 #include <limits>
+#include <regex>
 #include <core/report_management/report_management.h>
 
 #ifdef _WIN32
@@ -63,6 +64,20 @@ Dependencies loadDependenciesTest() {
     return dependencies;
 }
 
+bool isSecurePassword(const string& password) {
+    static const regex pattern(
+        R"(^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$)"
+    );
+    return regex_match(password, pattern);
+}
+
+bool isValidEmail(const string& email) {
+    static const regex pattern(
+        R"(^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$)"
+    );
+    return regex_match(email, pattern);
+}
+
 void start() {
     Dependencies dependencies = loadDependenciesTest();
 
@@ -81,13 +96,13 @@ void start() {
     while (isRunning) {
         // Check if the user is logged in
         if (!isLoggedIn) {
-            std::vector<std::string> loginOptions = {
+            vector<string> loginOptions = {
                 "Login",
                 "Quit",
             };
 
             int optionSelected = UI::showMenu(loginOptions);
-            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+            UI::showMessage("You selected option " + to_string(optionSelected), MessageType::Info);
 
 
             if (optionSelected == 1) {
@@ -120,19 +135,19 @@ void start() {
             bool seeManageUsers = false;
             UI::showMessage("Do you want to manage users?", MessageType::Warning);
 
-            std::vector<std::string> questionOptions = {
+            vector<string> questionOptions = {
                 "Yes", "No"
             };
 
             int optionSelected = UI::showMenu(questionOptions);
-            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+            UI::showMessage("You selected option " + to_string(optionSelected), MessageType::Info);
 
             if (optionSelected == 1) {
                 seeManageUsers = true;
 
                 while (seeManageUsers) {
                     UI::showMessage("Managing users...", MessageType::Info);
-                    std::vector<std::string> userManagerOptions = {
+                    vector<string> userManagerOptions = {
                         "Create User",
                         "Update User",
                         "Delete User",
@@ -141,7 +156,7 @@ void start() {
                     };
                     optionSelected = UI::showMenu(userManagerOptions);
 
-                    UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+                    UI::showMessage("You selected option " + to_string(optionSelected), MessageType::Info);
 
                     switch (optionSelected) {
                         case 1: {
@@ -159,22 +174,34 @@ void start() {
                             UI::showMessage("Please enter the password: ", MessageType::Info);
                             // TODO: validate that the password is strong
                             string password;
-                            std::getline(std::cin, password);
+                            getline(cin, password);
                             newUser.password = password;
+
+                            while (!isSecurePassword(password)) {
+                                UI::showMessage("Please enter a strong password: ", MessageType::Error);
+                                getline(cin, password);
+                                newUser.password = password;
+                            }
 
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
                             UI::showMessage("Please enter the name: ", MessageType::Info);
                             string name;
-                            std::getline(std::cin, name);
+                            getline(cin, name);
                             newUser.name = name;
 
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
                             UI::showMessage("Please enter the email: ", MessageType::Info);
                             string email;
-                            std::getline(std::cin, email);
+                            getline(cin, email);
                             newUser.email = email;
+
+                            while (!isValidEmail(email)) {
+                                UI::showMessage("Please enter a valid email: ", MessageType::Error);
+                                getline(cin, email);
+                                newUser.email = email;
+                            }
 
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -247,7 +274,7 @@ void start() {
                                 "Yes", "No"
                             };
                             optionSelected = UI::showMenu(questionOptions);
-                            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+                            UI::showMessage("You selected option " + to_string(optionSelected), MessageType::Info);
                             if (optionSelected == 2) {
                                 UI::showMessage("User not deleted", MessageType::Info);
                                 break;
@@ -312,7 +339,7 @@ void start() {
         bool stillRunning = true;
         while (stillRunning && isLoggedIn) {
             // Show the main menu if the user is logged in
-            std::vector<std::string> mainMenuOptions = {
+            vector<string> mainMenuOptions = {
                 "Encrypt File",
                 "Decrypt File",
                 "Delete File",
@@ -323,7 +350,7 @@ void start() {
             };
 
             int optionSelected = UI::showMenu(mainMenuOptions);
-            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+            UI::showMessage("You selected option " + to_string(optionSelected), MessageType::Info);
 
             switch (optionSelected) {
                 case 1: {
