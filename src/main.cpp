@@ -3,6 +3,9 @@
 #include <variant>
 #include <core/file_management/file_management.h>
 
+#include "core/file_management/file_management.h"
+#include "core/report_management/report_management.h"
+
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
@@ -174,7 +177,8 @@ void start() {
     Dependencies dependencies = loadDependenciesTest();
 
     Auth auth{ dependencies.database, dependencies.encrypt};
-    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file };
+    ReportManagement report_management(dependencies.database);
+    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file, (&report_management)};
     Session session;
     bool isLoggedIn = false;
 
@@ -474,8 +478,37 @@ void start() {
                 UI::showMessage("Generating report...", MessageType::Info);
 
                 // 1. Get all reports allowed to the user
+                optional<vector<Report>> reports = report_management.getListReports(session);
 
                 // 2. Show the list of reports
+                if (!reports.has_value()) {
+                    UI::showMessage("No Reports found", MessageType::Warning);
+                    break;
+                }
+
+                vector<string> headers = {
+                    "ID", "ID File", "File Name", "User ID",
+                    "Owner", "Student ID", "Action", "Date Action"
+                };
+                vector<map<string,string>> rows;
+                int index = 1;
+                for (const auto& rpt : *reports) {
+                    map<string,string> row;
+                    row["ID"]          = to_string(index++);
+                    row["ID File"]     = to_string(rpt.encrypted_file_id);
+                    row["File Name"]   = rpt.encrypted_file_name;
+                    row["User ID"]     = to_string(rpt.user_id);
+                    row["Owner"]       = rpt.user_name;
+                    row["Student ID"]  = rpt.student_id;
+                    row["Action"]      = (rpt.action == CREATE  ? "CREATE"  :
+                                          rpt.action == DELETE  ? "DELETE"  :
+                                          rpt.action == ENCRYPT ? "ENCRYPT" :
+                                          rpt.action == DECRYPT ? "DECRYPT" :
+                                                                  "SHARE");
+                    row["Date Action"] = rpt.action_date;
+                    rows.push_back(row);
+                }
+                UI::showTableWithInformation(headers, rows);
 
                 break;
             }

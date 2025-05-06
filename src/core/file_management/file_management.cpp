@@ -6,12 +6,14 @@
 #include "./models/session.h"
 
 #include <string>
+
+#include "../../models/report.h"
 using namespace std;
 
 const string FileManagement::PATH_ENCRYPT_FILE =  "./encrypted_files/";
 
-FileManagement::FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService)
-    : databaseService(databaseService), encryptService(encryptService), fileService(fileService) {}
+FileManagement::FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService,ReportManagement* reportManagement)
+    : databaseService(databaseService), encryptService(encryptService), fileService(fileService), reportManagement(reportManagement) {}
 
 FileManagement::~FileManagement() = default;
 
@@ -73,7 +75,29 @@ bool FileManagement::encryptFile(const Session& session, const string& file_name
 
     bool isSaved = databaseService->saveEncryptedFile(encryptedFile);
 
-    // TODO: SAVE REPORT
+    if (isSaved) {
+        optional<vector<EncryptedFile>> encryptedFiles = databaseService->getEncryptedFilesByOwnerID(session.user_id);
+
+        if (encryptedFiles.has_value()) {
+
+            for (const auto& file : *encryptedFiles) {
+                if (file.file_name == file_name) {
+                    encryptedFile.id = file.id;
+                    break;
+                }
+            }
+
+            Report report = Report();
+            report.encrypted_file_id = encryptedFile.id;
+            report.encrypted_file_name = encryptedFile.file_name;
+            report.user_id = session.user_id;
+            report.user_name = session.user_name;
+            report.student_id = session.user_student_id;
+            report.action = Actions::CREATE;
+
+            reportManagement->createReport(report);
+        }
+    }
 
     return isSaved;
 }
@@ -116,7 +140,15 @@ bool FileManagement::decryptFile(const Session& session, int fileID, const strin
 
     fileService->writeFile(output_decrypted_file, decrypted_file);
 
-    // TODO: SAVE REPORT
+    Report report = Report();
+    report.encrypted_file_id = fileID;
+    report.encrypted_file_name = encrypted_file_row.file_name;
+    report.user_id = session.user_id;
+    report.user_name = session.user_name;
+    report.student_id = session.user_student_id;
+    report.action = Actions::DECRYPT;
+
+    reportManagement->createReport(report);
 
     return true;
 }
