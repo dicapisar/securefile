@@ -180,7 +180,15 @@ bool FileManagement::deleteFile(const Session& session, int fileID, const string
     databaseService->deleteRecordByID(EncryptedFileModel, fileID);
 
     // 6. Generate a report on database
-    // TODO: SAVE REPORT
+    Report report = Report();
+    report.encrypted_file_id = fileID;
+    report.encrypted_file_name = file_name;
+    report.user_id = session.user_id;
+    report.user_name = session.user_name;
+    report.student_id = session.user_student_id;
+    report.action = Actions::DELETE;
+
+    reportManagement->createReport(report);
 
     return true;
 }
@@ -283,7 +291,15 @@ bool FileManagement::shareFile(const Session& session, int fileID, const string&
     bool isSaved = databaseService->saveSharedFile(shared_file);
 
     // 8. Generate a report on database
-    // TODO: SAVE REPORT
+    Report report = Report();
+    report.encrypted_file_id = fileID;
+    report.encrypted_file_name = file_name;
+    report.user_id = session.user_id;
+    report.user_name = session.user_name;
+    report.student_id = session.user_student_id;
+    report.action = Actions::SHARE;
+
+    reportManagement->createReport(report);
 
     return true;
 }
