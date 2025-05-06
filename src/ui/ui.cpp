@@ -48,7 +48,7 @@ void UI::showExitMessage() {
 }
 
 int UI::showMenu(const vector<string>& options) {
-    clearScreen();
+    //clearScreen();
     showMessage("Select an option:", MessageType::Info);
     for (size_t i = 0; i < options.size(); ++i) {
         cout << "  " << setw(2) << (i + 1) << ") " << options[i] << "\n";
