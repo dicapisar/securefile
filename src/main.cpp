@@ -169,7 +169,7 @@ void start() {
                             cin >> student_id;
                             newUser.student_id = student_id;
 
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 
                             UI::showMessage("Please enter the password: ", MessageType::Info);
                             // TODO: validate that the password is strong
@@ -183,14 +183,14 @@ void start() {
                                 newUser.password = password;
                             }
 
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 
                             UI::showMessage("Please enter the name: ", MessageType::Info);
                             string name;
                             getline(cin, name);
                             newUser.name = name;
 
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 
                             UI::showMessage("Please enter the email: ", MessageType::Info);
                             string email;
@@ -203,7 +203,7 @@ void start() {
                                 newUser.email = email;
                             }
 
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 
                             bool is_ok = user_manager.addUser(session, newUser);
 
