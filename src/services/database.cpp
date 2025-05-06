@@ -582,3 +582,116 @@ bool DatabaseService::saveReport(const Report &report) {
     sqlite3_finalize(stmt);
     return true;
 }
+
+bool DatabaseService::createUser(const User &user) {
+    string sql = R"(
+        INSERT INTO users (student_id, name, email, password, is_admin)
+        VALUES (?, ?, ?, ?, ?);
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, user.student_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, user.name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, user.email.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, user.password.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 5, user.is_admin ? 1 : 0);
+
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error inserting record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+
+    return true;
+}
+
+bool DatabaseService::deleteUser(const string &student_id) {
+    string sql = R"(
+        DELETE FROM users WHERE student_id = ?;
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, student_id.c_str(), -1, SQLITE_TRANSIENT);
+
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error deleting record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DatabaseService::updateUser(const User &user) {
+    string sql = R"(
+        UPDATE users
+        SET student_id = ?, name = ?, email = ?, password = ?, is_admin = ?
+        WHERE id = ?;
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, user.student_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, user.name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, user.email.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, user.password.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 5, user.is_admin ? 1 : 0);
+    sqlite3_bind_int(stmt, 6, user.id);
+
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error deleting record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+
+}
+
+bool DatabaseService::updateUserPassword(const string &student_id, const string &new_password) {
+    string sql = R"(
+        UPDATE users
+        SET password = ?
+        WHERE student_id = ?;
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "❌ Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, new_password.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, student_id.c_str(), -1, SQLITE_TRANSIENT);
+
+    int step_result = sqlite3_step(stmt);
+    if (step_result != SQLITE_DONE) {
+        cerr << "❌ Error updating record: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}

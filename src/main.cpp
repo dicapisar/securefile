@@ -2,6 +2,8 @@
 #include <vector>
 #include <variant>
 #include <core/file_management/file_management.h>
+#include <core/user_management/user_manager.h>
+#include <limits>
 
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
@@ -175,12 +177,14 @@ void start() {
 
     Auth auth{ dependencies.database, dependencies.encrypt};
     FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file };
+    UserManager user_manager{ dependencies.database, dependencies.encrypt};
     Session session;
     bool isLoggedIn = false;
+    bool isRunning = true;
 
     UI::showWelcomeMessage();
 
-    while (true) {
+    while (isRunning) {
         // Check if the user is logged in
         if (!isLoggedIn) {
             std::vector<std::string> loginOptions = {
@@ -216,6 +220,199 @@ void start() {
             } else {
                 break;
             }
+        }
+
+        if (session.is_admin) {
+            bool seeManageUsers = false;
+            UI::showMessage("Do you want to manage users?", MessageType::Warning);
+
+            std::vector<std::string> questionOptions = {
+            "Yes", "No"
+            };
+
+            int optionSelected = UI::showMenu(questionOptions);
+            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+            if (optionSelected == 1) {
+                seeManageUsers = true;
+
+                while (seeManageUsers) {
+                    UI::showMessage("Managing users...", MessageType::Info);
+                    std::vector<std::string> userManagerOptions = {
+                        "Create User",
+                        "Update User",
+                        "Delete User",
+                        "List Users",
+                        "Go to Main Menu"
+                    };
+                    optionSelected = UI::showMenu(userManagerOptions);
+
+                    UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+
+                    switch (optionSelected) {
+                        case 1: {
+                            UI::showMessage("Create User...", MessageType::Info);
+
+                            User newUser = User();
+
+                            UI::showMessage("Please enter the student ID: ", MessageType::Info);
+                            string student_id;
+                            cin >> student_id;
+                            newUser.student_id = student_id;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            UI::showMessage("Please enter the password: ", MessageType::Info); // TODO: validate that the password is strong
+                            string password;
+                            std::getline(std::cin, password);
+                            newUser.password = password;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            UI::showMessage("Please enter the name: ", MessageType::Info);
+                            string name;
+                            std::getline(std::cin, name);
+                            newUser.name = name;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            UI::showMessage("Please enter the email: ", MessageType::Info);
+                            string email;
+                            std::getline(std::cin, email);
+                            newUser.email = email;
+
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            bool is_ok = user_manager.addUser(session, newUser);
+
+                            if (is_ok) {
+                                UI::showMessage("User created successfully", MessageType::Success);
+                            } else {
+                                UI::showMessage("Error creating user, please try again", MessageType::Error);
+                            }
+
+                            break;
+                        }
+                        case 2: {
+                            UI::showMessage("Update User...", MessageType::Info);
+
+                            UI::showMessage("Please enter the student ID: ", MessageType::Info);
+                            string student_id;
+                            cin >> student_id;
+
+                            optional<User> user = user_manager.getUser(session, student_id);
+                            if (!user.has_value()) {
+                                UI::showMessage("User not found", MessageType::Error);
+                                break;
+                            }
+
+                            User userUpdated = user.value();
+
+                            UI::showMessage("Please enter the new student id: ", MessageType::Info);
+                            string new_student_id;
+                            cin >> new_student_id;
+
+                            UI::showMessage("Please enter the new name: ", MessageType::Info);
+                            string new_name;
+                            cin >> new_name;
+
+                            UI::showMessage("Please enter the new email: ", MessageType::Info);
+                            string new_email;
+                            cin >> new_email;
+
+                            userUpdated.student_id = student_id;
+                            userUpdated.name = new_name;
+                            userUpdated.email = new_email;
+
+                            bool is_ok = user_manager.updateUser(session, userUpdated);
+
+                            if (is_ok) {
+                                UI::showMessage("User updated successfully", MessageType::Success);
+                            } else {
+                                UI::showMessage("Error updated user, please try again", MessageType::Error);
+                            }
+
+                            break;
+                        }
+                        case 3: {
+                            UI::showMessage("Delete User...", MessageType::Info);
+
+                            UI::showMessage("Please enter the student ID to delete: ", MessageType::Info);
+                            string student_id;
+                            cin >> student_id;
+
+                            optional<User> user = user_manager.getUser(session, student_id);
+                            if (!user.has_value()) {
+                                UI::showMessage("User not found", MessageType::Error);
+                                break;
+                            }
+
+                            UI::showMessage("Are you sure you want to delete the user?", MessageType::Warning);
+                            questionOptions = {
+                                "Yes", "No"
+                            };
+                            optionSelected = UI::showMenu(questionOptions);
+                            UI::showMessage("You selected option " + std::to_string(optionSelected), MessageType::Info);
+                            if (optionSelected == 2) {
+                                UI::showMessage("User not deleted", MessageType::Info);
+                                break;
+                            }
+
+                            bool is_ok = user_manager.deleteUser(session, student_id);
+
+                            if (is_ok) {
+                                UI::showMessage("User deleted successfully", MessageType::Success);
+                            } else {
+                                UI::showMessage("Error deleting user, please try again", MessageType::Error);
+                            }
+
+                            break;
+                        }
+                        case 4: {
+                            UI::showMessage("List Users...", MessageType::Info);
+
+                            optional<vector<User>> users = user_manager.getListUsers(session);
+                            if (!users.has_value()) {
+                                UI::showMessage("No users found", MessageType::Warning);
+                                break;
+                            }
+
+                            // Show the list of users
+                            vector<string> headers = {"ID", "Student ID", "Name", "Email", "Is Admin"};
+                            vector<map<string,string>> rows;
+                            int index = 1;
+                            for (const auto& user : *users) {
+                                map<string,string> row;
+                                row["ID"] = to_string(index);
+                                row["Student ID"] = user.student_id;
+                                row["Name"] = user.name;
+                                row["Email"] = user.email;
+                                row["Is Admin"] = user.is_admin ? "Yes" : "No";
+                                rows.push_back(row);
+                                index++;
+                            }
+                            UI::showTableWithInformation(headers, rows);
+
+                            break;
+                        }
+                        case 5: {
+                            UI::showMessage("Going to Main Menu...", MessageType::Info);
+                            seeManageUsers = false;
+                            break;
+                        }
+                        default: {
+                            UI::showMessage("Invalid option", MessageType::Error);
+                        }
+                    }
+
+                }
+            } else {
+                seeManageUsers = false;
+            }
+
+
+
+            UI::showMessage("Continuing to file management...", MessageType::Info);
         }
 
         // Show the main menu if the user is logged in
