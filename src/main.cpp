@@ -176,8 +176,8 @@ void start() {
     Dependencies dependencies = loadDependenciesTest();
 
     Auth auth{ dependencies.database, dependencies.encrypt};
-    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file };
     ReportManagement report_management(dependencies.database);
+    FileManagement file_management{ dependencies.database, dependencies.encrypt, dependencies.file };
     Session session;
     bool isLoggedIn = false;
 

@@ -6,12 +6,14 @@
 #include "./models/session.h"
 
 #include <string>
+
+#include "../../models/report.h"
 using namespace std;
 
 const string FileManagement::PATH_ENCRYPT_FILE =  "./encrypted_files/";
 
-FileManagement::FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService)
-    : databaseService(databaseService), encryptService(encryptService), fileService(fileService) {}
+FileManagement::FileManagement(DatabaseService* databaseService, EncryptService* encryptService, FileService* fileService,ReportManagement* reportManagement)
+    : databaseService(databaseService), encryptService(encryptService), fileService(fileService), reportManagement(reportManagement) {}
 
 FileManagement::~FileManagement() = default;
 
@@ -73,7 +75,19 @@ bool FileManagement::encryptFile(const Session& session, const string& file_name
 
     bool isSaved = databaseService->saveEncryptedFile(encryptedFile);
 
-    // TODO: SAVE REPORT
+    if (isSaved) {
+        //databaseService->getEncryptedFilesByOwnerID(session.user_id);
+
+        Report report = Report();
+        report.encrypted_file_id = 0;
+        report.encrypted_file_name = encryptedFile.file_name;
+        report.user_id = session.user_id;
+        report.user_name = session.user_name;
+        report.student_id = session.student_id;
+        report.action = Actions::CREATE;
+
+        reportManagement->createReport(report);
+    }
 
     return isSaved;
 }
