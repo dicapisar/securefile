@@ -72,3 +72,24 @@ target_link_libraries(securefile PRIVATE
         SQLite::SQLite3
         Boost::filesystem
 )
+
+add_executable(test_services
+        test/test_services.cpp
+        src/services/encrypt.cpp
+        src/services/file.cpp
+        src/services/database.cpp
+        src/models/user.cpp
+        src/models/encrypted_file.cpp
+        src/models/shared_file.cpp
+        src/models/metadata_file.cpp
+        src/models/report.cpp
+)
+target_include_directories(test_services PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+)
+target_link_libraries(test_services PRIVATE
+        OpenSSL::SSL
+        OpenSSL::Crypto
+        SQLite::SQLite3
+        Boost::filesystem
+)
