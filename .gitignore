@@ -1,3 +1,10 @@
 .idea
 build/
 cmake-build-debug
+mac_build-release/CMakeFiles
+mac_build-release/cmake_install.cmake
+mac_build-release/CMakeCache.txt
+mac_build-release/data.sql
+mac_build-release/install_manifest.txt
+mac_build-release/Makefile
+mac_build-release/test_services

@@ -114,44 +114,85 @@ The project uses an in-memory SQLite database that loads from `data/data.sql` an
 ```bash
 👀 Validating installation of Libraries...
 ✅ Database started on memory correctly 🚀
-✅ Database restored from: data_backup.sql
-ID: 1 | Nombre: ADMIN | Email: admin@email.com | Password: something | Admin: Yes | Crated at: 2025-04-28 09:07:33
-ID: 2 | Nombre: Test of update   | Email: diego@torrens.com | Password: something | Admin: No | Crated at: 2025-04-28 09:07:33
-
-📂 Encrypted File Found:
-ID: 1 | Name: test_one | Path: test_path_one
-👤 Owner: ADMIN | Owner Email: admin@email.com
-
-📂 Encrypted File Found:
-ID: 2 | Name: test_two | Path: test_path_two
-👤 Owner: ADMIN | Owner Email: admin@email.com
-
-📂 Encrypted File Found:
-ID: 3 | Name: test_three | Path: test_path_three
-👤 Owner: ADMIN | Owner Email: admin@email.com
-
-📂 Shared Encrypted File Found:
-ID: 2 | Name: test_two | Path: test_path_two
-👤 Owner: Test of update   | Owner Email: diego@torrens.com
-
-📂 Shared Encrypted File Found:
-ID: 3 | Name: test_three | Path: test_path_three
-👤 Owner: Test of update   | Owner Email: diego@torrens.com
+✅ Data loaded successfully from: data.sql
 ✅ File service started correctly 🚀
 ✅ Encrypt service started correctly 🚀
-❌ Error reading file. 
-
-📁 File Encrypted Successfully at: ./encrypted_files/test.txt.enc
-📂 File Decrypted Successfully at: ./encrypted_files/test.txt.enc
-ID: 1
-ID Encrypted File: 1
-ID Shared File: 1
-ID Metadata File: 1
 🎉 All Libraries Working Successfully.
-✅ Encrypt service closed correctly
-✅ File service closed correctly
-✅ Database saved in: data_backup.sql
-🔒 Database closed successfully since destructor method.
+
+Welcome to:
+    █▀▀ █▀▀ █▀▀ █ █ █▀▄ █▀▀   █▀▀ ▀█▀ █   █▀▀
+    ▀▀█ █▀▀ █   █ █ █▀▄ █▀▀   █▀▀  █  █   █▀▀
+    ▀▀▀ ▀▀▀ ▀▀▀ ▀▀▀ ▀ ▀ ▀▀▀   ▀   ▀▀▀ ▀▀▀ ▀▀▀
+Created by:
+    Name: Christophe Nicolas Bourgeonnier, Diego Camilo Pinto Sarmiento, Mayerli Almario Arevalo
+    Student ID: A00173434 , A00151853, A00143310
+
+
+ℹ️  [INFO] Select an option:
+   1) Login
+   2) Quit
 
 ```
+
+## 🚀 Release Creation
+
+### 🍏 macOS 
+
+1️⃣ **Move to root folder**
+```bash
+cd securefile
+```
+
+2️⃣ **Create the release folder**
+```bash
+mkdir -p mac_build-release && cd mac_build-release
+```
+
+3️⃣ **Run cmake**
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=$(pwd)/package \
+      ..
+```
+
+4️⃣ **Build the project**
+```bash
+cmake --build . --config Release -- -j4
+```
+
+5️⃣ **Create the package**
+```bash
+cmake --install . --config Release
+```
+
+This will generate an optimized securefile executable in mac_build-release/package/bin/ and copy data.sql there as well.
+
+---
+
+### 🪟 Windows (with vcpkg)
+
+1️⃣ **Move to root folder**
+```powershell
+cd securefile
+```
+
+2️⃣ **Create the release folder**
+```powershell
+mkdir win-build-release; win-build-release
+```
+
+3️⃣ **Run cmake**
+```powershell
+cmake -A x64 `
+      -DCMAKE_BUILD_TYPE=Release `
+      -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake `
+      -DCMAKE_INSTALL_PREFIX=$(pwd)\package `
+      ..
+```
+
+4️⃣ **Build the project**
+```powershell
+cmake --build . --config Release --target INSTALL
+```
+
 
