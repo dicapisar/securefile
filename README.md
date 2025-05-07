@@ -178,7 +178,8 @@ cd securefile
 
 2️⃣ **Create the release folder**
 ```powershell
-mkdir win-build-release; win-build-release
+mkdir win-build-release
+cd win-build-release
 ```
 
 3️⃣ **Run cmake**
